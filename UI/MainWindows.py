@@ -106,22 +106,22 @@ class Ui_MainWindow(object):
         self.label_3 = QtWidgets.QLabel(self.InfoFrame)
         self.label_3.setGeometry(QtCore.QRect(10, 40, 80, 23))
         self.label_3.setObjectName("label_3")
-        self.pushButton = QtWidgets.QPushButton(self.InfoFrame)
-        self.pushButton.setGeometry(QtCore.QRect(320, 310, 31, 31))
-        self.pushButton.setText("")
+        self.saveChanges = QtWidgets.QPushButton(self.InfoFrame)
+        self.saveChanges.setGeometry(QtCore.QRect(320, 310, 31, 31))
+        self.saveChanges.setText("")
         icon3 = QtGui.QIcon()
         icon3.addPixmap(QtGui.QPixmap("UI/icon/save"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushButton.setIcon(icon3)
-        self.pushButton.setIconSize(QtCore.QSize(24, 24))
-        self.pushButton.setObjectName("pushButton")
-        self.pushButton_2 = QtWidgets.QPushButton(self.InfoFrame)
-        self.pushButton_2.setGeometry(QtCore.QRect(350, 310, 31, 31))
-        self.pushButton_2.setText("")
+        self.saveChanges.setIcon(icon3)
+        self.saveChanges.setIconSize(QtCore.QSize(24, 24))
+        self.saveChanges.setObjectName("pushButton")
+        self.cancelChanges = QtWidgets.QPushButton(self.InfoFrame)
+        self.cancelChanges.setGeometry(QtCore.QRect(350, 310, 31, 31))
+        self.cancelChanges.setText("")
         icon4 = QtGui.QIcon()
         icon4.addPixmap(QtGui.QPixmap("UI/icon/return"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushButton_2.setIcon(icon4)
-        self.pushButton_2.setIconSize(QtCore.QSize(24, 24))
-        self.pushButton_2.setObjectName("pushButton_2")
+        self.cancelChanges.setIcon(icon4)
+        self.cancelChanges.setIconSize(QtCore.QSize(24, 24))
+        self.cancelChanges.setObjectName("pushButton_2")
         self.line_6 = QtWidgets.QFrame(self.InfoFrame)
         self.line_6.setGeometry(QtCore.QRect(0, 343, 381, 16))
         self.line_6.setFrameShape(QtWidgets.QFrame.HLine)
@@ -189,18 +189,18 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Эколог-Отходы"))
         self.CityIDLabel.setText(_translate("MainWindow", "Код города:"))
         self.textEdit.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:8.25pt; font-weight:400; font-style:normal;\">\n"
-"<p align=\"right\" style=\" margin-top:6px; margin-bottom:6px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt;\">3</span></p></body></html>"))
+"<p align=\"right\" style=\" margin-top:6px; margin-bottom:6px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt;\"></span></p></body></html>"))
         self.textEdit_2.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:8.25pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Краснодар</p></body></html>"))
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p></body></html>"))
         self.label_3.setText(_translate("MainWindow", "Наименование:"))
 
         # self.treeWidget.headerItem().setText(0, _translate("MainWindow", "ГОРОД"))

@@ -13,6 +13,9 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Ui_NewCity(object):
     def setupUi(self, NewCity):
+
+        CitiesIcon = QtGui.QIcon()
+        CitiesIcon.addPixmap(QtGui.QPixmap("UI/icon/city"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         NewCity.setObjectName("NewCity")
         NewCity.resize(400, 130)
         self.CityID = QtWidgets.QLabel(NewCity)
@@ -45,7 +48,7 @@ class Ui_NewCity(object):
 
     def retranslateUi(self, NewCity):
         _translate = QtCore.QCoreApplication.translate
-        NewCity.setWindowTitle(_translate("NewCity", "Dialog"))
+        NewCity.setWindowTitle(_translate("NewCity", "Добавить новый город"))
         self.CityID.setText(_translate("NewCity", "Код города:"))
         self.CityTitle.setText(_translate("NewCity", "Наименование:"))
         self.addCityBTN.setText(_translate("NewCity", "Добавить"))

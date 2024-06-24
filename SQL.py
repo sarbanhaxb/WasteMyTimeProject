@@ -7,6 +7,7 @@ class DataBase:
     def __init__(self):
         self.DB = sqlite3.connect('DataBase.db')
         self.cursor = self.DB.cursor()
+        self.cursor.execute("PRAGMA foreign_keys = ON;")
         self.cursor.execute("CREATE TABLE IF NOT EXISTS cities ("
                             "id INTEGER PRIMARY KEY,"
                             "title VARCHAR(100) NOT NULL)"
@@ -15,23 +16,24 @@ class DataBase:
                             "id INTEGER PRIMARY KEY,"
                             "id_city INTEGER,"
                             "title VARCHAR(100) NOT NULL,"
-                            "FOREIGN KEY (id_city) REFERENCES cities(id)" 
+                            "FOREIGN KEY (id_city) REFERENCES cities(id) ON DELETE CASCADE" 
                             ")")
         if not self.cursor.execute("SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='fkko');").fetchone()[0]:
             self.createFKKO()
         self.DB.commit()
 
-    def getDataCount(self) -> int:
-        return int(self.cursor.execute("SELECT COUNT (*) FROM cities").fetchall()[0][0])
+    def updateCityData(self, title, id):
+        self.cursor.execute("UPDATE cities SET title=? WHERE id=?", (title, id))
+        self.DB.commit()
+    def deleteCity(self, title) -> None:
+        self.cursor.execute(f"DELETE from cities WHERE title='{title}'")
+        self.DB.commit()
 
     def getCities(self) -> dict:
         di = dict()
         for i in self.cursor.execute("SELECT * FROM cities").fetchall():
             di[i[0]] = i[1]
         return di
-
-
-
 
     def getObjects(self) -> dict:
         d = dict()
@@ -41,6 +43,13 @@ class DataBase:
             else:
                 d[i[0]] = [i[2]]
         return d
+
+    def getIDCity(self, title) -> str:
+        return str(self.cursor.execute(f"SELECT id FROM cities WHERE title='{title}'").fetchall()[0][0])
+
+    def addNewCity(self, title:str):
+        self.cursor.execute("INSERT INTO cities (title) VALUES (?)", (title,))
+        self.DB.commit()
 
     def createFKKO(self):
         self.cursor.execute("CREATE TABLE IF NOT EXISTS fkko ("
