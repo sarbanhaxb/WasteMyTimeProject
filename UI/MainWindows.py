@@ -96,13 +96,13 @@ class Ui_MainWindow(object):
         self.CityIDLabel = QtWidgets.QLabel(self.InfoFrame)
         self.CityIDLabel.setGeometry(QtCore.QRect(10, 10, 61, 23))
         self.CityIDLabel.setObjectName("CityIDLabel")
-        self.textEdit = QtWidgets.QTextEdit(self.InfoFrame)
-        self.textEdit.setGeometry(QtCore.QRect(100, 10, 100, 23))
-        self.textEdit.setObjectName("textEdit")
-        self.textEdit_2 = QtWidgets.QTextEdit(self.InfoFrame)
-        self.textEdit_2.setGeometry(QtCore.QRect(100, 40, 211, 23))
-        self.textEdit_2.setAcceptRichText(True)
-        self.textEdit_2.setObjectName("textEdit_2")
+        self.CityIDField = QtWidgets.QTextEdit(self.InfoFrame)
+        self.CityIDField.setGeometry(QtCore.QRect(100, 10, 100, 23))
+        self.CityIDField.setObjectName("CityIDField")
+        self.CityTitleField = QtWidgets.QTextEdit(self.InfoFrame)
+        self.CityTitleField.setGeometry(QtCore.QRect(100, 40, 211, 23))
+        self.CityTitleField.setAcceptRichText(True)
+        self.CityTitleField.setObjectName("CityTitleField")
         self.label_3 = QtWidgets.QLabel(self.InfoFrame)
         self.label_3.setGeometry(QtCore.QRect(10, 40, 80, 23))
         self.label_3.setObjectName("label_3")
@@ -191,12 +191,12 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Эколог-Отходы"))
         self.CityIDLabel.setText(_translate("MainWindow", "Код города:"))
-        self.textEdit.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+        self.CityIDField.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:8.25pt; font-weight:400; font-style:normal;\">\n"
 "<p align=\"right\" style=\" margin-top:6px; margin-bottom:6px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt;\"></span></p></body></html>"))
-        self.textEdit_2.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+        self.CityTitleField.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:8.25pt; font-weight:400; font-style:normal;\">\n"

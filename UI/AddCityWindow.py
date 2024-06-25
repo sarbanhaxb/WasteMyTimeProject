@@ -42,6 +42,7 @@ class Ui_NewCity(object):
         self.ReturnBTN = QtWidgets.QPushButton(NewCity)
         self.ReturnBTN.setGeometry(QtCore.QRect(320, 100, 75, 25))
         self.ReturnBTN.setObjectName("ReturnBTN")
+        self.CityIDField.setEnabled(False)
 
         self.retranslateUi(NewCity)
         QtCore.QMetaObject.connectSlotsByName(NewCity)

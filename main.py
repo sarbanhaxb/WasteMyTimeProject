@@ -1,7 +1,8 @@
 import sys
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import QMainWindow, QLabel, QMessageBox, QTreeWidgetItem
+from PyQt5.QtCore import pyqtSignal, Qt
+from PyQt5.QtWidgets import QMainWindow, QLabel, QMessageBox, QTreeWidgetItem, QMenu, QAction
+
 
 import SQL
 from UI.AddCityWindow import Ui_NewCity
@@ -20,7 +21,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         WinIcon = QtGui.QIcon()
         WinIcon.addPixmap(QtGui.QPixmap('UI/icon/trash-svgrepo-com.svg'), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.setWindowIcon(QtGui.QIcon('UI/icon/trash-svgrepo-com.svg'))
-        self.textEdit.setDisabled(True)
+        self.CityIDField.setDisabled(True)
 
         # Удаление города
         self.DeleteButton.clicked.connect(self.DeleteCity)
@@ -32,19 +33,47 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.saveChanges.clicked.connect(self.updateData)
 
         #отменить изменения
-        self.cancelChanges.clicked.connect(self.cabcel)
-    def cabcel(self):
-        self.refreshEditText()
+        self.cancelChanges.clicked.connect(self.cancel)
 
-    def updateData(self):
-        self.data.updateCityData(self.textEdit_2.toPlainText(), self.textEdit.toPlainText())
+        #Контекст меню на City
+        self.contextMenu = QMenu(self.treeWidget)
+        self.addOrg = QAction("Добавить новый объект", self)
+        self.addOrg.setIcon(QtGui.QIcon("UI/icon/organization.svg"))
+        self.deleteOrg = QAction("Удалить строку", self)
+        self.deleteOrg.setIcon(QtGui.QIcon("UI/icon/basket-svgrepo-com.svg"))
+        self.treeWidget.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.treeWidget.customContextMenuRequested.connect(self.showContextMenu)
+        self.contextMenu.addAction(self.addOrg)
+        self.contextMenu.addAction(self.deleteOrg)
+        self.addOrg.triggered.connect(self.newOrganization)
+        self.deleteOrg.triggered.connect(self.deleteOrganization)
+
+    def newOrganization(self):
+        title = (self.treeWidget.selectedItems()[0].text(0))
+        self.data.addNewOrganization(self.data.getIDCity(title), title="asd")
         self.PrintTree()
 
+    def deleteOrganization(self):
+        pass
+
+    def showContextMenu(self, pos):
+        if self.treeWidget.itemAt(pos) is not None and self.sender().selectedItems()[0]:
+            self.contextMenu.exec_(self.sender().mapToGlobal(pos))
+
+    def cancel(self) -> None:
+        self.refreshEditText()
+
+    def updateData(self) -> None:
+        self.data.updateCityData(self.CityTitleField.toPlainText(), self.CityIDField.toPlainText())
+        self.PrintTree()
+
+    #Добавляет новый город
     def addNewCity(self) -> None:
         self.addCity = AddNewCityWidget()
         self.addCity.show()
         self.addCity.windowsclosed.connect(self.PrintTree)
 
+    #Удаляет город
     def DeleteCity(self) -> None:
         if self.treeWidget.selectedItems():
             msgCommit = QMessageBox(self)
@@ -57,11 +86,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.data.deleteCity(self.treeWidget.selectedItems()[0].text(0))
                 self.PrintTree()
 
-    def refreshEditText(self):
-        if self.treeWidget.selectedItems():
-            self.textEdit.setText(self.data.getIDCity(self.treeWidget.selectedItems()[0].text(0)))
-            self.textEdit_2.setText(self.treeWidget.selectedItems()[0].text(0))
+    def refreshEditText(self) -> None:
+        pass
+        # if self.treeWidget.selectedItems():
+        #     self.CityIDField.setText(self.data.getIDCity(self.treeWidget.selectedItems()[0].text(0)))
+        #     self.CityTitleField.setText(self.treeWidget.selectedItems()[0].text(0))
 
+    #Печать дерева
     def PrintTree(self) -> None:
         self.treeWidget.clear()
         _translate = QtCore.QCoreApplication.translate
@@ -83,6 +114,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     b = QtWidgets.QTreeWidgetItem(s)
                     b.setText(0, _translate("MainWindow", j))
                     b.setIcon(0, ObjectIcon)
+        self.treeWidget.expandAll()
+
 
     def closeApp(self) -> None:
         self.close()

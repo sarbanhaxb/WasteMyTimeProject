@@ -51,6 +51,10 @@ class DataBase:
         self.cursor.execute("INSERT INTO cities (title) VALUES (?)", (title,))
         self.DB.commit()
 
+    def addNewOrganization(self, id_city, title:str):
+        self.cursor.execute(f"INSERT INTO objects (id_city, title) VALUES ('{int(id_city)}', 'asd')")
+        self.DB.commit()
+
     def createFKKO(self):
         self.cursor.execute("CREATE TABLE IF NOT EXISTS fkko ("
                             "id INTEGER PRIMARY KEY, "
