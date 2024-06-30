@@ -41,18 +41,21 @@ class DataBase:
             if i[1] in d:
                 d[i[1]].append(i[2])
             else:
-                d[i[0]] = [i[2]]
+                d[i[1]] = [i[2]]
         return d
 
     def getIDCity(self, title) -> str:
         return str(self.cursor.execute(f"SELECT id FROM cities WHERE title='{title}'").fetchall()[0][0])
+
+    def getTitleCity(self, id) -> str:
+        return str(self.cursor.execute(f"SELECT title FROM cities WHERE id='{id}'").fetchall()[0][0])
 
     def addNewCity(self, title:str):
         self.cursor.execute("INSERT INTO cities (title) VALUES (?)", (title,))
         self.DB.commit()
 
     def addNewOrganization(self, id_city, title:str):
-        self.cursor.execute(f"INSERT INTO objects (id_city, title) VALUES ('{int(id_city)}', 'asd')")
+        self.cursor.execute(f"INSERT INTO objects (id_city, title) VALUES ('{int(id_city)}', '{title}')")
         self.DB.commit()
 
     def createFKKO(self):
@@ -71,5 +74,5 @@ class DataBase:
 
 """testing command"""
 bd = DataBase()
-# print(bd.getCities())
+# bd.getObjects().values()
 # print(bd.getDataCount())

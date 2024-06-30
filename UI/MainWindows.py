@@ -53,6 +53,7 @@ class Ui_MainWindow(object):
         self.AddButton.setIcon(icon1)
         self.AddButton.setIconSize(QtCore.QSize(36, 36))
 
+        # Кнопка добавления нового объекта + линии
         self.AddButton.setObjectName("AddButton")
         self.line = QtWidgets.QFrame(self.ButtonFrame)
         self.line.setGeometry(QtCore.QRect(50, 10, 20, 41))
@@ -75,6 +76,7 @@ class Ui_MainWindow(object):
         self.ExitButton.setIconSize(QtCore.QSize(43, 43))
         self.ExitButton.setObjectName("ExitButton")
 
+        # Линии
         self.line_3 = QtWidgets.QFrame(self.centralwidget)
         self.line_3.setGeometry(QtCore.QRect(0, 60, 661, 16))
         self.line_3.setFrameShape(QtWidgets.QFrame.HLine)
@@ -85,27 +87,55 @@ class Ui_MainWindow(object):
         self.line_4.setFrameShape(QtWidgets.QFrame.HLine)
         self.line_4.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.line_4.setObjectName("line_4")
+
+        #ТРИВЬЮ
         self.treeView = QtWidgets.QTreeView(self.centralwidget)
         self.treeView.setGeometry(QtCore.QRect(0, 140, 256, 351))
         self.treeView.setObjectName("treeView")
+
+        # ПОЛЕ ИНФОРМАЦИИ
         self.InfoFrame = QtWidgets.QFrame(self.centralwidget)
         self.InfoFrame.setGeometry(QtCore.QRect(260, 140, 381, 351))
         self.InfoFrame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.InfoFrame.setFrameShadow(QtWidgets.QFrame.Raised)
         self.InfoFrame.setObjectName("InfoFrame")
+        self.InfoFrame.setEnabled(False)
+
+        # Лейбл и поле ID города
         self.CityIDLabel = QtWidgets.QLabel(self.InfoFrame)
         self.CityIDLabel.setGeometry(QtCore.QRect(10, 10, 61, 23))
         self.CityIDLabel.setObjectName("CityIDLabel")
         self.CityIDField = QtWidgets.QTextEdit(self.InfoFrame)
         self.CityIDField.setGeometry(QtCore.QRect(100, 10, 100, 23))
         self.CityIDField.setObjectName("CityIDField")
+
+        # Лейбл и поле ввода с наименованием города
+        self.CityTitleLabel = QtWidgets.QLabel(self.InfoFrame)
+        self.CityTitleLabel.setGeometry(QtCore.QRect(10, 40, 80, 23))
+        self.CityTitleLabel.setObjectName("CityTitleLabel")
         self.CityTitleField = QtWidgets.QTextEdit(self.InfoFrame)
         self.CityTitleField.setGeometry(QtCore.QRect(100, 40, 211, 23))
         self.CityTitleField.setAcceptRichText(True)
         self.CityTitleField.setObjectName("CityTitleField")
-        self.label_3 = QtWidgets.QLabel(self.InfoFrame)
-        self.label_3.setGeometry(QtCore.QRect(10, 40, 80, 23))
-        self.label_3.setObjectName("label_3")
+
+        # Лейбл и поле ввода с ID объекта
+        self.ObjectIDLabel = QtWidgets.QLabel(self.InfoFrame)
+        self.ObjectIDLabel.setGeometry(QtCore.QRect(10, 70, 80, 23))
+        self.ObjectIDLabel.setObjectName("ObjectIDLabel")
+        self.ObjectIDField = QtWidgets.QTextEdit(self.InfoFrame)
+        self.ObjectIDField.setGeometry(QtCore.QRect(100, 70, 211, 23))
+        self.ObjectIDField.setObjectName("ObjectIDField")
+
+        # Лейбл и поле ввода с наименованием объекта
+        self.ObjectTitleLabel = QtWidgets.QLabel(self.InfoFrame)
+        self.ObjectTitleLabel.setGeometry(QtCore.QRect(10, 100, 80, 23))
+        self.ObjectTitleLabel.setObjectName("ObjectTitleLabel")
+        self.ObjectTitleField = QtWidgets.QTextEdit(self.InfoFrame)
+        self.ObjectTitleField.setGeometry(QtCore.QRect(100, 100, 211, 23))
+        self.ObjectTitleField.setObjectName("ObjectTitleField")
+
+
+        # Кнопка сохранения изменений
         self.saveChanges = QtWidgets.QPushButton(self.InfoFrame)
         self.saveChanges.setGeometry(QtCore.QRect(320, 310, 31, 31))
         self.saveChanges.setText("")
@@ -114,6 +144,8 @@ class Ui_MainWindow(object):
         self.saveChanges.setIcon(icon3)
         self.saveChanges.setIconSize(QtCore.QSize(24, 24))
         self.saveChanges.setObjectName("pushButton")
+
+        # Кнопка отмены изменений
         self.cancelChanges = QtWidgets.QPushButton(self.InfoFrame)
         self.cancelChanges.setGeometry(QtCore.QRect(350, 310, 31, 31))
         self.cancelChanges.setText("")
@@ -122,6 +154,8 @@ class Ui_MainWindow(object):
         self.cancelChanges.setIcon(icon4)
         self.cancelChanges.setIconSize(QtCore.QSize(24, 24))
         self.cancelChanges.setObjectName("pushButton_2")
+
+        # Линии
         self.line_6 = QtWidgets.QFrame(self.InfoFrame)
         self.line_6.setGeometry(QtCore.QRect(0, 343, 381, 16))
         self.line_6.setFrameShape(QtWidgets.QFrame.HLine)
@@ -133,6 +167,7 @@ class Ui_MainWindow(object):
         self.line_5.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.line_5.setObjectName("line_5")
 
+        # Дерево
         self.treeWidget = QtWidgets.QTreeWidget(self.centralwidget)
         self.treeWidget.setEnabled(True)
         self.treeWidget.setGeometry(QtCore.QRect(0, 140, 255, 350))
@@ -141,16 +176,10 @@ class Ui_MainWindow(object):
         self.treeWidget.setFont(font)
         self.treeWidget.setStatusTip("")
         self.treeWidget.setObjectName("treeWidget")
-        # item_0 = QtWidgets.QTreeWidgetItem(self.treeWidget)
         icon5 = QtGui.QIcon()
         icon5.addPixmap(QtGui.QPixmap("UI/icon/city"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        # item_0.setIcon(0, icon5)
-        # item_1 = QtWidgets.QTreeWidgetItem(item_0)
         icon6 = QtGui.QIcon()
         icon6.addPixmap(QtGui.QPixmap("UI/icon/organization"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        # item_1.setIcon(0, icon6)
-        # item_2 = QtWidgets.QTreeWidgetItem(item_1)
-        # item_2 = QtWidgets.QTreeWidgetItem(item_1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 650, 21))
@@ -201,16 +230,25 @@ class Ui_MainWindow(object):
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:8.25pt; font-weight:400; font-style:normal;\">\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p></body></html>"))
-        self.label_3.setText(_translate("MainWindow", "Наименование:"))
+        self.ObjectIDField.setHtml(_translate("MainWindow",
+                                            "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+                                            "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+                                            "p, li { white-space: pre-wrap; }\n"
+                                            "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:8.25pt; font-weight:400; font-style:normal;\">\n"
+                                            "<p align=\"right\" style=\" margin-top:6px; margin-bottom:6px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt;\"></span></p></body></html>"))
+        self.ObjectTitleField.setHtml(_translate("MainWindow",
+                                            "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+                                            "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+                                            "p, li { white-space: pre-wrap; }\n"
+                                            "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:8.25pt; font-weight:400; font-style:normal;\">\n"
+                                            "<p align=\"right\" style=\" margin-top:6px; margin-bottom:6px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt;\"></span></p></body></html>"))
+        self.CityTitleLabel.setText(_translate("MainWindow", "Наименование:"))
+        self.ObjectIDLabel.setText(_translate("MainWindow", "Код объекта:"))
+        self.CityIDLabel.setText(_translate("MainWindow", "Код города:"))
+        self.ObjectTitleLabel.setText(_translate("MainWindow", "Наименование:"))
 
-        # self.treeWidget.headerItem().setText(0, _translate("MainWindow", "ГОРОД"))
-        # __sortingEnabled = self.treeWidget.isSortingEnabled()
-        # self.treeWidget.setSortingEnabled(False)
-        # self.treeWidget.topLevelItem(0).setText(0, _translate("MainWindow", "Краснодар"))
-        # self.treeWidget.topLevelItem(0).child(0).setText(0, _translate("MainWindow", "Куст скважин 2-бис"))
-        # self.treeWidget.topLevelItem(0).child(0).child(0).setText(0, _translate("MainWindow", "СМР"))
-        # self.treeWidget.topLevelItem(0).child(0).child(1).setText(0, _translate("MainWindow", "эксплуатация"))
-        # self.treeWidget.setSortingEnabled(__sortingEnabled)
+
+
         self.menu.setTitle(_translate("MainWindow", "Справочники"))
         self.menu_2.setTitle(_translate("MainWindow", "Настройки"))
         self.menu_3.setTitle(_translate("MainWindow", "Справка"))
