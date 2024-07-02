@@ -15,18 +15,27 @@ class DataBase:
         self.cursor.execute("CREATE TABLE IF NOT EXISTS objects("
                             "id INTEGER PRIMARY KEY,"
                             "id_city INTEGER,"
-                            "title VARCHAR(100) NOT NULL,"
+                            "title VARCHAR(100) NOT NULL UNIQUE,"
                             "FOREIGN KEY (id_city) REFERENCES cities(id) ON DELETE CASCADE" 
                             ")")
         if not self.cursor.execute("SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='fkko');").fetchone()[0]:
             self.createFKKO()
         self.DB.commit()
 
-    def updateCityData(self, title, id):
+    def updateCityData(self, title, id) -> None:
         self.cursor.execute("UPDATE cities SET title=? WHERE id=?", (title, id))
         self.DB.commit()
+
+    def updateObjectData(self, title, id) -> None:
+        self.cursor.execute("UPDATE objects SET title=? WHERE id=?", (title, id))
+        self.DB.commit()
+
     def deleteCity(self, title) -> None:
-        self.cursor.execute(f"DELETE from cities WHERE title='{title}'")
+        self.cursor.execute(f"DELETE FROM cities WHERE title='{title}'")
+        self.DB.commit()
+
+    def deleteObject(self, title, id):
+        self.cursor.execute(f"DELETE FROM objects WHERE title='{title}' AND id='{id}'")
         self.DB.commit()
 
     def getCities(self) -> dict:
@@ -57,6 +66,9 @@ class DataBase:
     def addNewOrganization(self, id_city, title:str):
         self.cursor.execute(f"INSERT INTO objects (id_city, title) VALUES ('{int(id_city)}', '{title}')")
         self.DB.commit()
+
+    def getIDObject(self, title) -> str:
+        return str(self.cursor.execute(f"SELECT id FROM objects WHERE title='{title}'").fetchall()[0][0])
 
     def createFKKO(self):
         self.cursor.execute("CREATE TABLE IF NOT EXISTS fkko ("

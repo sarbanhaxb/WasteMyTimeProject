@@ -1,3 +1,5 @@
+import random
+import string
 import sys
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtCore import pyqtSignal, Qt
@@ -7,7 +9,16 @@ from PyQt5.QtWidgets import QMainWindow, QLabel, QMessageBox, QTreeWidgetItem, Q
 import SQL
 from UI.AddCityWindow import Ui_NewCity
 from UI.MainWindows import Ui_MainWindow
+from UI.AddObjectWindow import Ui_NewObject
 
+
+def ref(item, count):
+    c = count
+    while item.parent() != None:
+        c += 1
+        item = item.parent()
+        ref(item, c)
+    return c
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -21,10 +32,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         WinIcon = QtGui.QIcon()
         WinIcon.addPixmap(QtGui.QPixmap('UI/icon/trash-svgrepo-com.svg'), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.setWindowIcon(QtGui.QIcon('UI/icon/trash-svgrepo-com.svg'))
-        self.CityIDField.setDisabled(True)
+        # self.CityIDField.setDisabled(True)
 
-        # Удаление города
-        self.DeleteButton.clicked.connect(self.DeleteCity)
+        # Удаление города/объекта
+        self.DeleteButton.clicked.connect(self.DeletePos)
 
         # Обновление поля информации
         self.treeWidget.itemSelectionChanged.connect(self.refreshEditText)
@@ -46,26 +57,44 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.contextMenu.addAction(self.addOrg)
         self.contextMenu.addAction(self.deleteOrg)
         self.addOrg.triggered.connect(self.newOrganization)
-        self.deleteOrg.triggered.connect(self.deleteOrganization)
+        self.deleteOrg.triggered.connect(self.DeletePos)
+
+
+        #ОКНО РАСЧЕТА
+        self.treeWidget.doubleClicked.connect(self.OpenWasteCalc)
 
     def newOrganization(self):
-        title = (self.treeWidget.selectedItems()[0].text(0))
-        self.data.addNewOrganization(self.data.getIDCity(title), title="asd")
-        self.PrintTree()
+        self.addOrganization = AddNewObjectWidget(self.CityIDField.toPlainText())
+        self.addOrganization.show()
+        self.addOrganization.windowsclosed.connect(self.PrintTree)
 
-    def deleteOrganization(self):
-        pass
+    def OpenWasteCalc(self):
+        if ref(self.treeWidget.selectedItems()[0], 0) == 1:
+            print('YES')
+        else:
+            print("NOTHING")
 
     def showContextMenu(self, pos):
-        if self.treeWidget.itemAt(pos) is not None and self.sender().selectedItems()[0]:
+        if self.treeWidget.itemAt(pos) is not None and ref(self.treeWidget.selectedItems()[0], 0) == 0:
+            self.contextMenu.exec_(self.sender().mapToGlobal(pos))
+        elif self.treeWidget.itemAt(pos) is not None and ref(self.treeWidget.selectedItems()[0], 0) == 1:
+            # нужно поработать над контекст меню
             self.contextMenu.exec_(self.sender().mapToGlobal(pos))
 
     def cancel(self) -> None:
         self.refreshEditText()
 
     def updateData(self) -> None:
-        self.data.updateCityData(self.CityTitleField.toPlainText(), self.CityIDField.toPlainText())
-        self.PrintTree()
+        if ref(self.treeWidget.selectedItems()[0], 0) == 0:
+            title = self.CityTitleField.toPlainText()
+            id = self.CityIDField.toPlainText()
+            self.data.updateCityData(title, id)
+            self.PrintTree()
+        elif ref(self.treeWidget.selectedItems()[0], 0) == 1:
+            id = self.ObjectIDField.toPlainText()
+            title = self.ObjectTitleField.toPlainText()
+            self.data.updateObjectData(title, id)
+            self.PrintTree()
 
     #Добавляет новый город
     def addNewCity(self) -> None:
@@ -74,8 +103,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.addCity.windowsclosed.connect(self.PrintTree)
 
     #Удаляет город
-    def DeleteCity(self) -> None:
-        if self.treeWidget.selectedItems():
+    def DeletePos(self) -> None:
+        if self.treeWidget.selectedItems() and ref(self.treeWidget.selectedItems()[0], 0) == 0:
             msgCommit = QMessageBox(self)
             msgCommit.setIcon(QMessageBox.Warning)
             msgCommit.setWindowTitle("Удаление города")
@@ -85,12 +114,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if not msgCommit.exec_():
                 self.data.deleteCity(self.treeWidget.selectedItems()[0].text(0))
                 self.PrintTree()
+        elif self.treeWidget.selectedItems() and ref(self.treeWidget.selectedItems()[0], 0) == 1:
+            title = self.treeWidget.selectedItems()[0].text(0)
+            id = self.data.getIDObject(title)
+            msgCommit = QMessageBox(self)
+            msgCommit.setIcon(QMessageBox.Warning)
+            msgCommit.setWindowTitle("Удаление объекта")
+            msgCommit.setText("Будут удалены все данные об организации. Уверены?")
+            msgCommit.addButton("Да", QMessageBox.YesRole)
+            msgCommit.addButton("Нет", QMessageBox.NoRole)
+            if not msgCommit.exec_():
+                self.data.deleteObject(title, id)
+                self.PrintTree()
 
-    def refreshEditText(self) -> None:
-        pass
-        # if self.treeWidget.selectedItems():
-        #     self.CityIDField.setText(self.data.getIDCity(self.treeWidget.selectedItems()[0].text(0)))
-        #     self.CityTitleField.setText(self.treeWidget.selectedItems()[0].text(0))
 
     #Печать дерева
     def PrintTree(self) -> None:
@@ -106,16 +142,45 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         objects = self.data.getObjects()
         cities = self.data.getCities()
         for i, k in zip(cities.keys(), cities.values()):
-            s = QtWidgets.QTreeWidgetItem(self.treeWidget)
-            s.setIcon(0, CitiesIcon)
-            s.setText(0, _translate("MainWindow", k))
+            item_0 = QtWidgets.QTreeWidgetItem(self.treeWidget)
+            item_0.setIcon(0, CitiesIcon)
+            item_0.setText(0, _translate("MainWindow", k))
             if i in objects.keys():
                 for j in objects[i]:
-                    b = QtWidgets.QTreeWidgetItem(s)
-                    b.setText(0, _translate("MainWindow", j))
-                    b.setIcon(0, ObjectIcon)
+                    item_1 = QtWidgets.QTreeWidgetItem(item_0)
+                    item_1.setText(0, _translate("MainWindow", j))
+                    item_1.setIcon(0, ObjectIcon)
         self.treeWidget.expandAll()
 
+    def refreshEditText(self) -> None:
+        pass
+        self.InfoFrame.setEnabled(True)
+        if self.treeWidget.selectedItems() and ref(self.treeWidget.selectedItems()[0], 0) == 0:
+            id = self.data.getIDCity(self.treeWidget.selectedItems()[0].text(0))
+            title = self.data.getTitleCity(id)
+            self.CityIDField.setEnabled(True)
+            self.CityTitleField.setEnabled(True)
+            self.CityIDField.setText(id)
+            self.CityIDField.setEnabled(False)
+            self.CityTitleField.setText(title)
+            self.ObjectIDField.setEnabled(False)
+            self.ObjectTitleField.setEnabled(False)
+            self.ObjectTitleField.setText("")
+            self.ObjectIDField.setText("")
+        elif self.treeWidget.selectedItems() and ref(self.treeWidget.selectedItems()[0], 0) == 1:
+            id = self.data.getIDCity(self.treeWidget.selectedItems()[0].parent().text(0))
+            titleCity = self.data.getTitleCity(id)
+            title = self.treeWidget.selectedItems()[0].text(0)
+            self.CityIDField.setText(id)
+            self.CityIDField.setEnabled(False)
+            self.CityTitleField.setText(titleCity)
+            self.CityTitleField.setEnabled(False)
+            self.ObjectIDField.setText(self.data.getIDObject(title))
+            self.ObjectIDField.setEnabled(False)
+            self.ObjectTitleField.setEnabled(True)
+            self.ObjectTitleField.setText(title)
+        else:
+            pass
 
     def closeApp(self) -> None:
         self.close()
@@ -141,6 +206,26 @@ class AddNewCityWidget(QLabel, Ui_NewCity):
         self.windowsclosed.emit()
         event.accept()
 
+class AddNewObjectWidget(QLabel, Ui_NewObject):
+    windowsclosed = pyqtSignal()
+
+    def __init__(self, ID, parent=None):
+        super(AddNewObjectWidget, self).__init__(parent)
+        self.setupUi(self)
+        self.ID = ID
+        self.setWindowModality(2)
+        self.ReturnBTN.clicked.connect(self.close)
+        self.addObjectBTN.clicked.connect(self.addObject)
+        self.setWindowIcon(QtGui.QIcon("UI/icon/organization.svg"))
+        self.data = SQL.DataBase()
+
+    def addObject(self):
+        self.data.addNewOrganization(self.ID, self.ObjectTitleField.text())
+        self.close()
+
+    def closeEvent(self, event):
+        self.windowsclosed.emit()
+        event.accept()
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
