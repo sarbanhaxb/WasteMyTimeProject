@@ -2,15 +2,15 @@ import random
 import string
 import sys
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtCore import pyqtSignal, Qt
-from PyQt5.QtWidgets import QMainWindow, QLabel, QMessageBox, QTreeWidgetItem, QMenu, QAction
-
+from PyQt5.QtCore import pyqtSignal, Qt, QRect
+from PyQt5.QtWidgets import QMainWindow, QLabel, QMessageBox, QTreeWidgetItem, QMenu, QAction, QTableWidget, \
+    QTableWidgetItem, QHeaderView
 
 import SQL
 from UI.AddCityWindow import Ui_NewCity
 from UI.MainWindows import Ui_MainWindow
 from UI.AddObjectWindow import Ui_NewObject
-
+from screeninfo import get_monitors
 
 def ref(item, count):
     c = count
@@ -56,17 +56,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.treeWidget.customContextMenuRequested.connect(self.showContextMenu)
         self.contextMenu.addAction(self.addOrg)
         self.contextMenu.addAction(self.deleteOrg)
-        self.addOrg.triggered.connect(self.newOrganization)
+        self.addOrg.triggered.connect(self.newObject)
         self.deleteOrg.triggered.connect(self.DeletePos)
 
 
         #ОКНО РАСЧЕТА
         self.treeWidget.doubleClicked.connect(self.OpenWasteCalc)
 
-    def newOrganization(self):
-        self.addOrganization = AddNewObjectWidget(self.CityIDField.toPlainText())
-        self.addOrganization.show()
-        self.addOrganization.windowsclosed.connect(self.PrintTree)
+        #просмотр БДО
+        self.showBDO.triggered.connect(self.openBDO)
+
+    def openBDO(self):
+        bdo = self.data.getBDO()
+        self.bdo = TableBDO(self.data.getTableSize('bdo'), 14)
+        self.bdo.show()
+
+    def newObject(self):
+        self.addObject = AddNewObjectWidget(self.CityIDField.toPlainText())
+        self.addObject.show()
+        self.addObject.windowsclosed.connect(self.PrintTree)
 
     def OpenWasteCalc(self):
         if ref(self.treeWidget.selectedItems()[0], 0) == 1:
@@ -153,7 +161,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.treeWidget.expandAll()
 
     def refreshEditText(self) -> None:
-        pass
         self.InfoFrame.setEnabled(True)
         if self.treeWidget.selectedItems() and ref(self.treeWidget.selectedItems()[0], 0) == 0:
             id = self.data.getIDCity(self.treeWidget.selectedItems()[0].text(0))
@@ -220,12 +227,65 @@ class AddNewObjectWidget(QLabel, Ui_NewObject):
         self.data = SQL.DataBase()
 
     def addObject(self):
-        self.data.addNewOrganization(self.ID, self.ObjectTitleField.text())
-        self.close()
+        try:
+            self.data.addNewOrganization(self.ID, self.ObjectTitleField.text())
+            self.close()
+        except IndexError:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText("Ошибка")
+            msg.setText("Объект с таким названием существует.")
+            msg.setWindowTitle('Ошибка')
+            msg.exec_()
 
     def closeEvent(self, event):
         self.windowsclosed.emit()
         event.accept()
+
+
+class TableBDO(QTableWidget):
+    def __init__(self, row_count, col_count):
+        super().__init__(row_count, col_count)
+        self.setWindowTitle("Банк данных об отходах")
+        self.setGeometry(0, 0, 1500, 600)
+        self.setWindowModality(2)
+        self.data = SQL.DataBase()
+        self.bdo = self.data.getBDO()
+        self.setWordWrap(True)
+        header = self.horizontalHeader()
+        for i in range(14):
+            header.setSectionResizeMode(i, QHeaderView.ResizeToContents)
+
+
+        columnTitle = ("Код по ФККО",
+                       "Наименование вида отхода",
+                       "Происхождение (Производство)",
+                       "Происхождение (Исходная продукция (товар)",
+                       "Происхождение (Процесс)",
+                       "Состав (Наименование компонентов)",
+                       "Состав (Содержание, % масс. (минимум)",
+                       "Состав (Содержание, % масс. (максимум)",
+                       "Примечание о компонентном составе",
+                       "Примечание к виду отхода",
+                       "Агрегатное состояние и физическая форма",
+                       "Класс опасности",
+                       "Критерии отнесения",
+                       "Документ (основание)")
+
+        self.setHorizontalHeaderLabels(columnTitle)
+
+        for i in range(row_count):
+            for j in range(col_count):
+                if str(self.bdo[i][j]) == 'nan':
+                    el = ''
+                else:
+                    el = str(self.bdo[i][j]).strip('\n')
+                item = QTableWidgetItem(el)
+                self.setItem(i, j, item)
+
+
+
+
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
