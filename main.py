@@ -4,7 +4,7 @@ import sys
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtCore import pyqtSignal, Qt, QRect
 from PyQt5.QtWidgets import QMainWindow, QLabel, QMessageBox, QTreeWidgetItem, QMenu, QAction, QTableWidget, \
-    QTableWidgetItem, QHeaderView
+    QTableWidgetItem, QHeaderView, QFileDialog, QDialog
 
 import SQL
 from UI.AddCityWindow import Ui_NewCity
@@ -20,12 +20,15 @@ def ref(item, count):
         ref(item, c)
     return c
 
+PATH = 'DataBase.db'
+
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
         self.addCity = None
         self.setupUi(self)
-        self.data = SQL.DataBase()
+        self.data = None
+        self.connectDB()
         self.PrintTree()
         self.ExitButton.clicked.connect(self.closeApp)
         self.AddButton.clicked.connect(self.addNewCity)
@@ -66,8 +69,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #просмотр БДО
         self.showBDO.triggered.connect(self.openBDO)
 
+        #выбор базы данных
+        self.DBPlaceMenu.triggered.connect(self.OpenFileDB)
+
+    def connectDB(self, path = PATH):
+        self.data = SQL.DataBase(path)
+        self.PrintTree()
+
+    def OpenFileDB(self):
+        global PATH
+        dialog = QFileDialog(self)
+        dialog.setWindowTitle("Выбрать базу данных")
+        dialog.setNameFilter("Файл базы данных (*.db)")
+        if dialog.exec_():
+            self.connectDB(dialog.selectedFiles()[0])
+
+
     def openBDO(self):
-        bdo = self.data.getBDO()
         self.bdo = TableBDO(self.data.getTableSize('bdo'), 14)
         self.bdo.show()
 
@@ -99,6 +117,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.data.updateCityData(title, id)
             self.PrintTree()
         elif ref(self.treeWidget.selectedItems()[0], 0) == 1:
+            # тут нужно сделать проверку не поменял ли пользователь название объекта на такое, которое уже есть в таблице objects, иначе крашится программа, так как в таблице objects title уникальное.
             id = self.ObjectIDField.toPlainText()
             title = self.ObjectTitleField.toPlainText()
             self.data.updateObjectData(title, id)
@@ -203,7 +222,7 @@ class AddNewCityWidget(QLabel, Ui_NewCity):
         self.ReturnBTN.clicked.connect(self.close)
         self.addCityBTN.clicked.connect(self.addCity)
         self.setWindowIcon(QtGui.QIcon("UI/icon/city.svg"))
-        self.data = SQL.DataBase()
+        self.data = SQL.DataBase(PATH)
 
     def addCity(self):
         self.data.addNewCity(self.CityTitleField.text())
@@ -224,7 +243,7 @@ class AddNewObjectWidget(QLabel, Ui_NewObject):
         self.ReturnBTN.clicked.connect(self.close)
         self.addObjectBTN.clicked.connect(self.addObject)
         self.setWindowIcon(QtGui.QIcon("UI/icon/organization.svg"))
-        self.data = SQL.DataBase()
+        self.data = SQL.DataBase(PATH)
 
     def addObject(self):
         try:
@@ -247,15 +266,14 @@ class TableBDO(QTableWidget):
     def __init__(self, row_count, col_count):
         super().__init__(row_count, col_count)
         self.setWindowTitle("Банк данных об отходах")
-        self.setGeometry(0, 0, 1500, 600)
+        self.setGeometry(0, 0, 1800, 600)
         self.setWindowModality(2)
-        self.data = SQL.DataBase()
+        self.data = SQL.DataBase(PATH)
         self.bdo = self.data.getBDO()
         self.setWordWrap(True)
         header = self.horizontalHeader()
         for i in range(14):
-            header.setSectionResizeMode(i, QHeaderView.ResizeToContents)
-
+            header.setSectionResizeMode(i, QHeaderView.Stretch)
 
         columnTitle = ("Код по ФККО",
                        "Наименование вида отхода",
@@ -281,10 +299,13 @@ class TableBDO(QTableWidget):
                 else:
                     el = str(self.bdo[i][j]).strip('\n')
                 item = QTableWidgetItem(el)
+                item.setTextAlignment(0x0001)  # Выравнивание по ширине столбца
+                item.setFlags(item.flags() | 0x0002)  # Флаг на перенос текста по словам
+                item.setFlags(item.flags() | 0x0004)  # Флаг на перенос текста на новую строку
                 self.setItem(i, j, item)
-
-
-
+            self.verticalHeader().setSectionResizeMode(i, QHeaderView.ResizeToContents)
+        self.resizeColumnsToContents()
+        self.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
 
 
 if __name__ == "__main__":

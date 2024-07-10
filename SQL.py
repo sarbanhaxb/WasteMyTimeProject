@@ -6,8 +6,9 @@ from PyQt5.QtWidgets import QMessageBox
 
 
 class DataBase:
-    def __init__(self):
-        self.DB = sqlite3.connect('DataBase.db')
+    def __init__(self, path):
+        PATH = path
+        self.DB = sqlite3.connect(PATH)
         self.cursor = self.DB.cursor()
         self.cursor.execute("PRAGMA foreign_keys = ON;")
         self.cursor.execute("CREATE TABLE IF NOT EXISTS cities ("
@@ -114,7 +115,7 @@ class DataBase:
 
 
 """testing command"""
-bd = DataBase()
+bd = DataBase('DataBase.db')
 # bdo = bd.getBDO()
 # for i in range(2):
 #     for j in range(14):
