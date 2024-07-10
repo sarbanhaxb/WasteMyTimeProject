@@ -1,10 +1,12 @@
 import random
 import string
 import sys
+import time
+
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtCore import pyqtSignal, Qt, QRect
 from PyQt5.QtWidgets import QMainWindow, QLabel, QMessageBox, QTreeWidgetItem, QMenu, QAction, QTableWidget, \
-    QTableWidgetItem, QHeaderView, QFileDialog, QDialog
+    QTableWidgetItem, QHeaderView, QFileDialog, QDialog, QVBoxLayout, QLineEdit, QProgressBar, QWidget
 
 import SQL
 from UI.AddCityWindow import Ui_NewCity
@@ -83,7 +85,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         dialog.setNameFilter("Файл базы данных (*.db)")
         if dialog.exec_():
             self.connectDB(dialog.selectedFiles()[0])
-
 
     def openBDO(self):
         self.bdo = TableBDO(self.data.getTableSize('bdo'), 14)
@@ -261,8 +262,111 @@ class AddNewObjectWidget(QLabel, Ui_NewObject):
         self.windowsclosed.emit()
         event.accept()
 
+class TableBDO(QDialog):
+    def __init__(self, row_count, col_count):
+        super().__init__()
+        self.data = SQL.DataBase(PATH)
+        self.bdo = self.data.getBDO()
+        self.initUI(row_count, col_count)
 
-class TableBDO(QTableWidget):
+    def initUI(self, row, col):
+        columnTitle = ("Код по ФККО",
+                       "Наименование вида отхода",
+                       "Происхождение (Производство)",
+                       "Происхождение (Исходная продукция (товар)",
+                       "Происхождение (Процесс)",
+                       "Состав (Наименование компонентов)",
+                       "Состав (Содержание, % масс. (минимум)",
+                       "Состав (Содержание, % масс. (максимум)",
+                       "Примечание о компонентном составе",
+                       "Примечание к виду отхода",
+                       "Агрегатное состояние и физическая форма",
+                       "Класс опасности",
+                       "Критерии отнесения",
+                       "Документ (основание)")
+
+        self.setWindowTitle("Банк данных об отходах")
+        self.setGeometry(0, 0, 1800, 600)
+        self.setWindowModality(2)
+
+        self.table_widget = QTableWidget()
+        self.table_widget.setWordWrap(True)
+        self.table_widget.setColumnCount(col)
+        self.table_widget.setHorizontalHeaderLabels(columnTitle)
+        self.table_widget.setRowCount(row)
+
+        for i in range(row):
+            for j in range(col):
+                if str(self.bdo[i][j]) == 'nan':
+                    el = ''
+                else:
+                    el = str(self.bdo[i][j]).strip('\n')
+                item = QTableWidgetItem(el)
+                item.setTextAlignment(0x0001)
+                item.setFlags(item.flags() | 0x0002)
+                item.setFlags(item.flags() | 0x0004)
+                self.table_widget.setItem(i, j, item)
+            # self.table_widget.verticalHeader().setSectionResizeMode(i, QHeaderView.ResizeToContents)
+
+        self.layout = QVBoxLayout()
+        self.layout.addWidget(self.table_widget)
+
+        self.fkkoLineLabel = QLabel()
+        self.fkkoLineLabel.setText('Фильтр по коду ФККО')
+
+        self.TitleLineLabel = QLabel()
+        self.TitleLineLabel.setText('Фильтр по наименованию отхода')
+
+        self.OriginLineLabel = QLabel()
+        self.OriginLineLabel.setText('Фильтр по происхождению')
+
+        self.filter_fkko = QLineEdit()
+        self.filter_title = QLineEdit()
+        self.filter_origin = QLineEdit()
+
+        self.filter_fkko.textChanged.connect(self.filterFKKO)
+        self.filter_title.textChanged.connect(self.filterTitle)
+        self.filter_title.textChanged.connect(self.filterOrigin)
+
+        self.layout.addWidget(self.fkkoLineLabel)
+        self.layout.addWidget(self.filter_fkko)
+
+        self.layout.addWidget(self.TitleLineLabel)
+        self.layout.addWidget(self.filter_title)
+
+        self.layout.addWidget(self.OriginLineLabel)
+        self.layout.addWidget(self.filter_origin)
+
+        self.setLayout(self.layout)
+
+    def filterFKKO(self):
+        text = self.filter_fkko.text()
+        for i in range(self.table_widget.rowCount()):
+            item = self.table_widget.item(i, 0)
+            if item.text().lower().startswith(text.lower()):
+                self.table_widget.setRowHidden(i, False)
+            else:
+                self.table_widget.setRowHidden(i, True)
+
+    def filterTitle(self):
+        text = self.filter_title.text()
+        for i in range(self.table_widget.rowCount()):
+            item = self.table_widget.item(i, 1)
+            if item.text().lower().startswith(text.lower()):
+                self.table_widget.setRowHidden(i, False)
+            else:
+                self.table_widget.setRowHidden(i, True)
+
+    def filterOrigin(self):
+        text = self.filter_origin.text()
+        for i in range(self.table_widget.rowCount()):
+            item = self.table_widget.item(i, 2)
+            if item.text().lower().startswith(text.lower()):
+                self.table_widget.setRowHidden(i, False)
+            else:
+                self.table_widget.setRowHidden(i, True)
+
+class TableBDO1(QTableWidget):
     def __init__(self, row_count, col_count):
         super().__init__(row_count, col_count)
         self.setWindowTitle("Банк данных об отходах")
