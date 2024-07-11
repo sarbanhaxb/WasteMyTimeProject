@@ -312,6 +312,7 @@ class TableBDO(QDialog):
                 item.setFlags(item.flags() | 0x0004)
                 self.table_widget.setItem(i, j, item)
             # self.table_widget.verticalHeader().setSectionResizeMode(i, QHeaderView.ResizeToContents)
+        self.table_widget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
 
 
         self.layout = QVBoxLayout()
@@ -332,7 +333,7 @@ class TableBDO(QDialog):
 
         self.filter_fkko.textChanged.connect(self.filterFKKO)
         self.filter_title.textChanged.connect(self.filterTitle)
-        self.filter_title.textChanged.connect(self.filterOrigin)
+        self.filter_origin.textChanged.connect(self.filterOrigin)
 
         self.layout.addWidget(self.fkkoLineLabel)
         self.layout.addWidget(self.filter_fkko)
@@ -349,7 +350,7 @@ class TableBDO(QDialog):
         text = self.filter_fkko.text()
         for i in range(self.table_widget.rowCount()):
             item = self.table_widget.item(i, 0)
-            if item.text().lower().startswith(text.lower()):
+            if item.text().lower().find(text.lower()) != -1:
                 self.table_widget.setRowHidden(i, False)
             else:
                 self.table_widget.setRowHidden(i, True)
@@ -358,7 +359,7 @@ class TableBDO(QDialog):
         text = self.filter_title.text()
         for i in range(self.table_widget.rowCount()):
             item = self.table_widget.item(i, 1)
-            if item.text().lower().startswith(text.lower()):
+            if item.text().lower().find(text.lower()) != -1:
                 self.table_widget.setRowHidden(i, False)
             else:
                 self.table_widget.setRowHidden(i, True)
@@ -367,7 +368,7 @@ class TableBDO(QDialog):
         text = self.filter_origin.text()
         for i in range(self.table_widget.rowCount()):
             item = self.table_widget.item(i, 2)
-            if item.text().lower().startswith(text.lower()):
+            if item.text().lower().find(text.lower()) != -1:
                 self.table_widget.setRowHidden(i, False)
             else:
                 self.table_widget.setRowHidden(i, True)
