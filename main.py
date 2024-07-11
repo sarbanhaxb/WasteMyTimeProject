@@ -324,6 +324,9 @@ class TableBDO(QDialog):
         self.TitleLineLabel = QLabel()
         self.TitleLineLabel.setText('Фильтр по наименованию отхода')
 
+        pass
+        "passasdasdasdasdasdas"
+
         self.OriginLineLabel = QLabel()
         self.OriginLineLabel.setText('Фильтр по происхождению')
 
