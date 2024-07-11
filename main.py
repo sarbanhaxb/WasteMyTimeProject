@@ -6,7 +6,7 @@ import time
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtCore import pyqtSignal, Qt, QRect
 from PyQt5.QtWidgets import QMainWindow, QLabel, QMessageBox, QTreeWidgetItem, QMenu, QAction, QTableWidget, \
-    QTableWidgetItem, QHeaderView, QFileDialog, QDialog, QVBoxLayout, QLineEdit, QProgressBar, QWidget
+    QTableWidgetItem, QHeaderView, QFileDialog, QDialog, QVBoxLayout, QLineEdit, QProgressBar, QWidget, QComboBox
 
 import SQL
 from UI.AddCityWindow import Ui_NewCity
@@ -289,7 +289,7 @@ class TableBDO(QDialog):
                        "Документ (основание)")
 
         self.setWindowTitle("Банк данных об отходах")
-        self.setGeometry(0, 0, 1800, 600)
+        self.setGeometry(0, 0, 1800, 800)
         self.setWindowModality(2)
 
         self.table_widget = QTableWidget()
@@ -314,112 +314,75 @@ class TableBDO(QDialog):
             # self.table_widget.verticalHeader().setSectionResizeMode(i, QHeaderView.ResizeToContents)
         self.table_widget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
 
-
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.table_widget)
 
-        self.fkkoLineLabel = QLabel()
-        self.fkkoLineLabel.setText('Фильтр по коду ФККО')
 
+        # Названия фильтров
+        self.FkkoLineLabel = QLabel()
+        self.FkkoLineLabel.setText('Фильтр по коду ФККО')
         self.TitleLineLabel = QLabel()
         self.TitleLineLabel.setText('Фильтр по наименованию отхода')
-
-        pass
-        "passasdasdasdasdasdas"
-
         self.OriginLineLabel = QLabel()
         self.OriginLineLabel.setText('Фильтр по происхождению')
+        self.CompoundLineLabel = QLabel()
+        self.CompoundLineLabel.setText('Фильтр по составу')
+        self.HazardClass = QLabel()
+        self.HazardClass.setText('Фильтр по классу опасности')
 
-        self.filter_fkko = QLineEdit()
-        self.filter_title = QLineEdit()
-        self.filter_origin = QLineEdit()
+        # строки ввода фильтров
+        self.fkko_line = QLineEdit()
+        self.title_line = QLineEdit()
+        self.origin_line = QLineEdit()
+        self.compound_line = QLineEdit()
+        self.hazard_box = QComboBox()
+        self.hazard_box.addItems(('I', 'II', "III", "IV", "V"))
 
-        self.filter_fkko.textChanged.connect(self.filterFKKO)
-        self.filter_title.textChanged.connect(self.filterTitle)
-        self.filter_origin.textChanged.connect(self.filterOrigin)
+        # подключение фильтра к событию изменения текста в line
+        self.fkko_line.textChanged.connect(self.filterTable)
+        self.title_line.textChanged.connect(self.filterTable)
+        self.origin_line.textChanged.connect(self.filterTable)
+        self.compound_line.textChanged.connect(self.filterTable)
+        self.hazard_box.currentTextChanged.connect(self.filterTable)
 
-        self.layout.addWidget(self.fkkoLineLabel)
-        self.layout.addWidget(self.filter_fkko)
-
+        # добавление на слой LabelLine и Line
+        self.layout.addWidget(self.FkkoLineLabel)
+        self.layout.addWidget(self.fkko_line)
         self.layout.addWidget(self.TitleLineLabel)
-        self.layout.addWidget(self.filter_title)
-
+        self.layout.addWidget(self.title_line)
         self.layout.addWidget(self.OriginLineLabel)
-        self.layout.addWidget(self.filter_origin)
+        self.layout.addWidget(self.origin_line)
+        self.layout.addWidget(self.CompoundLineLabel)
+        self.layout.addWidget(self.compound_line)
+        self.layout.addWidget(self.HazardClass)
+        self.layout.addWidget(self.hazard_box)
 
         self.setLayout(self.layout)
 
-    def filterFKKO(self):
-        text = self.filter_fkko.text()
-        for i in range(self.table_widget.rowCount()):
-            item = self.table_widget.item(i, 0)
-            if item.text().lower().find(text.lower()) != -1:
-                self.table_widget.setRowHidden(i, False)
-            else:
-                self.table_widget.setRowHidden(i, True)
+    def filterTable(self):
+        fkko_filter_text = self.fkko_line.text()
+        title_filter_text = self.title_line.text()
+        origin_filter_text = self.origin_line.text()
+        compound_filter_list = [i.lower() for i in self.compound_line.text().split()]
+        hazard_filter_text = self.hazard_box.currentText()
 
-    def filterTitle(self):
-        text = self.filter_title.text()
-        for i in range(self.table_widget.rowCount()):
-            item = self.table_widget.item(i, 1)
-            if item.text().lower().find(text.lower()) != -1:
-                self.table_widget.setRowHidden(i, False)
-            else:
-                self.table_widget.setRowHidden(i, True)
+        for row in range(self.table_widget.rowCount()):
+            fkko_item = self.table_widget.item(row, 0)
+            title_item = self.table_widget.item(row, 1)
+            origin1_item = self.table_widget.item(row, 2)
+            origin2_item = self.table_widget.item(row, 3)
+            origin3_item = self.table_widget.item(row, 4)
+            compound_list = [i.lower() for i in self.table_widget.item(row, 5).text().split()]
+            hazard_item = self.table_widget.item(row, 11)
 
-    def filterOrigin(self):
-        text = self.filter_origin.text()
-        for i in range(self.table_widget.rowCount()):
-            item = self.table_widget.item(i, 2)
-            if item.text().lower().find(text.lower()) != -1:
-                self.table_widget.setRowHidden(i, False)
+            if (fkko_filter_text.lower() in fkko_item.text().lower()
+                    and title_filter_text.lower() in title_item.text().lower())\
+                    and (origin_filter_text.lower() in origin1_item.text().lower() or origin_filter_text.lower() in origin2_item.text().lower() or origin_filter_text.lower() in origin3_item.text().lower())\
+                    and set(compound_filter_list).issubset(compound_list)\
+                    and hazard_filter_text.lower() == hazard_item.text().lower():
+                self.table_widget.setRowHidden(row, False)
             else:
-                self.table_widget.setRowHidden(i, True)
-
-# class TableBDO1(QTableWidget):
-#     def __init__(self, row_count, col_count):
-#         super().__init__(row_count, col_count)
-#         self.setWindowTitle("Банк данных об отходах")
-#         self.setGeometry(0, 0, 1800, 600)
-#         self.setWindowModality(2)
-#         self.data = SQL.DataBase(PATH)
-#         self.bdo = self.data.getBDO()
-#         self.setWordWrap(True)
-#         header = self.horizontalHeader()
-#         for i in range(14):
-#             header.setSectionResizeMode(i, QHeaderView.Stretch)
-#
-#         columnTitle = ("Код по ФККО",
-#                        "Наименование вида отхода",
-#                        "Происхождение (Производство)",
-#                        "Происхождение (Исходная продукция (товар)",
-#                        "Происхождение (Процесс)",
-#                        "Состав (Наименование компонентов)",
-#                        "Состав (Содержание, % масс. (минимум)",
-#                        "Состав (Содержание, % масс. (максимум)",
-#                        "Примечание о компонентном составе",
-#                        "Примечание к виду отхода",
-#                        "Агрегатное состояние и физическая форма",
-#                        "Класс опасности",
-#                        "Критерии отнесения",
-#                        "Документ (основание)")
-#
-#         self.setHorizontalHeaderLabels(columnTitle)
-#
-#         for i in range(row_count):
-#             for j in range(col_count):
-#                 if str(self.bdo[i][j]) == 'nan':
-#                     el = ''
-#                 else:
-#                     el = str(self.bdo[i][j]).strip('\n')
-#                 item = QTableWidgetItem(el)
-#                 item.setTextAlignment(0x0001)  # Выравнивание по ширине столбца
-#                 item.setFlags(item.flags() | 0x0002)  # Флаг на перенос текста по словам
-#                 item.setFlags(item.flags() | 0x0004)  # Флаг на перенос текста на новую строку
-#                 self.setItem(i, j, item)
-#             self.verticalHeader().setSectionResizeMode(i, QHeaderView.ResizeToContents)
-#         self.resizeColumnsToContents()
-#         self.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+                self.table_widget.setRowHidden(row, True)
 
 
 if __name__ == "__main__":
