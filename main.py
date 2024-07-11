@@ -112,17 +112,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.refreshEditText()
 
     def updateData(self) -> None:
-        if ref(self.treeWidget.selectedItems()[0], 0) == 0:
-            title = self.CityTitleField.toPlainText()
-            id = self.CityIDField.toPlainText()
-            self.data.updateCityData(title, id)
-            self.PrintTree()
-        elif ref(self.treeWidget.selectedItems()[0], 0) == 1:
-            # тут нужно сделать проверку не поменял ли пользователь название объекта на такое, которое уже есть в таблице objects, иначе крашится программа, так как в таблице objects title уникальное.
-            id = self.ObjectIDField.toPlainText()
-            title = self.ObjectTitleField.toPlainText()
-            self.data.updateObjectData(title, id)
-            self.PrintTree()
+        try:
+            if ref(self.treeWidget.selectedItems()[0], 0) == 0:
+                title = self.CityTitleField.toPlainText()
+                id = self.CityIDField.toPlainText()
+                self.data.updateCityData(title, id)
+                self.PrintTree()
+            elif ref(self.treeWidget.selectedItems()[0], 0) == 1:
+                # тут нужно сделать проверку не поменял ли пользователь название объекта на такое, которое уже есть в таблице objects, иначе крашится программа, так как в таблице objects title уникальное.
+                id = self.ObjectIDField.toPlainText()
+                title = self.ObjectTitleField.toPlainText()
+                self.data.updateObjectData(title, id)
+                self.PrintTree()
+        except IndexError:
+            pass
 
     #Добавляет новый город
     def addNewCity(self) -> None:
@@ -307,6 +310,7 @@ class TableBDO(QDialog):
                 item.setFlags(item.flags() | 0x0004)
                 self.table_widget.setItem(i, j, item)
             # self.table_widget.verticalHeader().setSectionResizeMode(i, QHeaderView.ResizeToContents)
+        self.table_widget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
 
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.table_widget)
@@ -326,7 +330,7 @@ class TableBDO(QDialog):
 
         self.filter_fkko.textChanged.connect(self.filterFKKO)
         self.filter_title.textChanged.connect(self.filterTitle)
-        self.filter_title.textChanged.connect(self.filterOrigin)
+        self.filter_origin.textChanged.connect(self.filterOrigin)
 
         self.layout.addWidget(self.fkkoLineLabel)
         self.layout.addWidget(self.filter_fkko)
@@ -343,7 +347,7 @@ class TableBDO(QDialog):
         text = self.filter_fkko.text()
         for i in range(self.table_widget.rowCount()):
             item = self.table_widget.item(i, 0)
-            if item.text().lower().startswith(text.lower()):
+            if item.text().lower().find(text.lower()) != -1:
                 self.table_widget.setRowHidden(i, False)
             else:
                 self.table_widget.setRowHidden(i, True)
@@ -352,7 +356,7 @@ class TableBDO(QDialog):
         text = self.filter_title.text()
         for i in range(self.table_widget.rowCount()):
             item = self.table_widget.item(i, 1)
-            if item.text().lower().startswith(text.lower()):
+            if item.text().lower().find(text.lower()) != -1:
                 self.table_widget.setRowHidden(i, False)
             else:
                 self.table_widget.setRowHidden(i, True)
@@ -361,55 +365,55 @@ class TableBDO(QDialog):
         text = self.filter_origin.text()
         for i in range(self.table_widget.rowCount()):
             item = self.table_widget.item(i, 2)
-            if item.text().lower().startswith(text.lower()):
+            if item.text().lower().find(text.lower()) != -1:
                 self.table_widget.setRowHidden(i, False)
             else:
                 self.table_widget.setRowHidden(i, True)
 
-class TableBDO1(QTableWidget):
-    def __init__(self, row_count, col_count):
-        super().__init__(row_count, col_count)
-        self.setWindowTitle("Банк данных об отходах")
-        self.setGeometry(0, 0, 1800, 600)
-        self.setWindowModality(2)
-        self.data = SQL.DataBase(PATH)
-        self.bdo = self.data.getBDO()
-        self.setWordWrap(True)
-        header = self.horizontalHeader()
-        for i in range(14):
-            header.setSectionResizeMode(i, QHeaderView.Stretch)
-
-        columnTitle = ("Код по ФККО",
-                       "Наименование вида отхода",
-                       "Происхождение (Производство)",
-                       "Происхождение (Исходная продукция (товар)",
-                       "Происхождение (Процесс)",
-                       "Состав (Наименование компонентов)",
-                       "Состав (Содержание, % масс. (минимум)",
-                       "Состав (Содержание, % масс. (максимум)",
-                       "Примечание о компонентном составе",
-                       "Примечание к виду отхода",
-                       "Агрегатное состояние и физическая форма",
-                       "Класс опасности",
-                       "Критерии отнесения",
-                       "Документ (основание)")
-
-        self.setHorizontalHeaderLabels(columnTitle)
-
-        for i in range(row_count):
-            for j in range(col_count):
-                if str(self.bdo[i][j]) == 'nan':
-                    el = ''
-                else:
-                    el = str(self.bdo[i][j]).strip('\n')
-                item = QTableWidgetItem(el)
-                item.setTextAlignment(0x0001)  # Выравнивание по ширине столбца
-                item.setFlags(item.flags() | 0x0002)  # Флаг на перенос текста по словам
-                item.setFlags(item.flags() | 0x0004)  # Флаг на перенос текста на новую строку
-                self.setItem(i, j, item)
-            self.verticalHeader().setSectionResizeMode(i, QHeaderView.ResizeToContents)
-        self.resizeColumnsToContents()
-        self.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+# class TableBDO1(QTableWidget):
+#     def __init__(self, row_count, col_count):
+#         super().__init__(row_count, col_count)
+#         self.setWindowTitle("Банк данных об отходах")
+#         self.setGeometry(0, 0, 1800, 600)
+#         self.setWindowModality(2)
+#         self.data = SQL.DataBase(PATH)
+#         self.bdo = self.data.getBDO()
+#         self.setWordWrap(True)
+#         header = self.horizontalHeader()
+#         for i in range(14):
+#             header.setSectionResizeMode(i, QHeaderView.Stretch)
+#
+#         columnTitle = ("Код по ФККО",
+#                        "Наименование вида отхода",
+#                        "Происхождение (Производство)",
+#                        "Происхождение (Исходная продукция (товар)",
+#                        "Происхождение (Процесс)",
+#                        "Состав (Наименование компонентов)",
+#                        "Состав (Содержание, % масс. (минимум)",
+#                        "Состав (Содержание, % масс. (максимум)",
+#                        "Примечание о компонентном составе",
+#                        "Примечание к виду отхода",
+#                        "Агрегатное состояние и физическая форма",
+#                        "Класс опасности",
+#                        "Критерии отнесения",
+#                        "Документ (основание)")
+#
+#         self.setHorizontalHeaderLabels(columnTitle)
+#
+#         for i in range(row_count):
+#             for j in range(col_count):
+#                 if str(self.bdo[i][j]) == 'nan':
+#                     el = ''
+#                 else:
+#                     el = str(self.bdo[i][j]).strip('\n')
+#                 item = QTableWidgetItem(el)
+#                 item.setTextAlignment(0x0001)  # Выравнивание по ширине столбца
+#                 item.setFlags(item.flags() | 0x0002)  # Флаг на перенос текста по словам
+#                 item.setFlags(item.flags() | 0x0004)  # Флаг на перенос текста на новую строку
+#                 self.setItem(i, j, item)
+#             self.verticalHeader().setSectionResizeMode(i, QHeaderView.ResizeToContents)
+#         self.resizeColumnsToContents()
+#         self.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
 
 
 if __name__ == "__main__":
