@@ -336,7 +336,7 @@ class TableBDO(QDialog):
         self.origin_line = QLineEdit()
         self.compound_line = QLineEdit()
         self.hazard_box = QComboBox()
-        self.hazard_box.addItems(('I', 'II', "III", "IV", "V"))
+        self.hazard_box.addItems(('', 'I', 'II', "III", "IV", "V"))
 
         # подключение фильтра к событию изменения текста в line
         self.fkko_line.textChanged.connect(self.filterTable)
@@ -379,7 +379,7 @@ class TableBDO(QDialog):
                     and title_filter_text.lower() in title_item.text().lower())\
                     and (origin_filter_text.lower() in origin1_item.text().lower() or origin_filter_text.lower() in origin2_item.text().lower() or origin_filter_text.lower() in origin3_item.text().lower())\
                     and set(compound_filter_list).issubset(compound_list)\
-                    and hazard_filter_text.lower() == hazard_item.text().lower():
+                    and (hazard_filter_text.lower() == hazard_item.text().lower()):
                 self.table_widget.setRowHidden(row, False)
             else:
                 self.table_widget.setRowHidden(row, True)
