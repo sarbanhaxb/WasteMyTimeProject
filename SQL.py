@@ -110,6 +110,10 @@ class DataBase:
     def getTableSize(self, name: str) -> int:
         return self.DB.execute(f"SELECT count (*) FROM '{name}'").fetchall()[0][0]
 
+
+    def getFKKO(self) -> list:
+        return self.DB.execute("SELECT num, title, hazardClass from bdo").fetchall()
+
     def getBDO(self) -> list:
         return self.DB.execute("SELECT num, title, originManufacturing, originProducts, originProcess, compound, compoundPercentMin, compoundPercentMax, compoundNotice, wasteNotice, physicalState, hazardClass, attributionCriteria, docs FROM bdo").fetchall()
 

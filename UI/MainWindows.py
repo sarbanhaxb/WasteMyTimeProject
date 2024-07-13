@@ -194,17 +194,23 @@ class Ui_MainWindow(object):
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
-        self.action = QtWidgets.QAction(MainWindow)
-        self.action.setObjectName("action")
+
+        self.showFKKO = QtWidgets.QAction(MainWindow)
+        self.showFKKO.setObjectName("action")
+
         self.showBDO = QtWidgets.QAction(MainWindow)
         self.showBDO.setObjectName("action_2")
+
         self.action_3 = QtWidgets.QAction(MainWindow)
         self.action_3.setObjectName("action_3")
+
         self.DBPlaceMenu = QtWidgets.QAction(MainWindow)
         self.DBPlaceMenu.setObjectName("action_4")
+
         self.action_5 = QtWidgets.QAction(MainWindow)
         self.action_5.setObjectName("action_5")
-        self.menu.addAction(self.action)
+
+        self.menu.addAction(self.showFKKO)
         self.menu.addAction(self.showBDO)
         self.menu_2.addAction(self.action_3)
         self.menu_2.addAction(self.DBPlaceMenu)
@@ -252,7 +258,7 @@ class Ui_MainWindow(object):
         self.menu.setTitle(_translate("MainWindow", "Справочники"))
         self.menu_2.setTitle(_translate("MainWindow", "Настройки"))
         self.menu_3.setTitle(_translate("MainWindow", "Справка"))
-        self.action.setText(_translate("MainWindow", "Просмотр ФККО"))
+        self.showFKKO.setText(_translate("MainWindow", "Просмотр ФККО"))
         self.showBDO.setText(_translate("MainWindow", "Просмотр БДО"))
         self.action_3.setText(_translate("MainWindow", "Параметры программы"))
         self.DBPlaceMenu.setText(_translate("MainWindow", "Расположение базы данных"))

@@ -1,4 +1,3 @@
-import random
 import string
 import sys
 import time
@@ -13,20 +12,26 @@ from UI.AddCityWindow import Ui_NewCity
 from UI.MainWindows import Ui_MainWindow
 from UI.AddObjectWindow import Ui_NewObject
 from screeninfo import get_monitors
+from WasteCalc import WasteCalc
 
-def ref(item, count):
-    c = count
-    while item.parent() != None:
-        c += 1
+
+def ItemLevelPosition(item: QTreeWidgetItem, count: int) -> int:
+    level = count
+    while item.parent() is not None:
+        level += 1
         item = item.parent()
-        ref(item, c)
-    return c
+        ItemLevelPosition(item, level)
+    return level
 
-PATH = 'DataBase.db'
+
+PATH: str = 'DataBase.db'
+
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
+        self.bdo = None
+        self.addObject = None
         self.addCity = None
         self.setupUi(self)
         self.data = None
@@ -64,21 +69,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.addOrg.triggered.connect(self.newObject)
         self.deleteOrg.triggered.connect(self.DeletePos)
 
-
         #ОКНО РАСЧЕТА
         self.treeWidget.doubleClicked.connect(self.OpenWasteCalc)
 
         #просмотр БДО
         self.showBDO.triggered.connect(self.openBDO)
 
+        #просмотре ФККО
+        self.showFKKO.triggered.connect(self.openFKKO)
+
         #выбор базы данных
         self.DBPlaceMenu.triggered.connect(self.OpenFileDB)
 
-    def connectDB(self, path = PATH):
+    def connectDB(self, path: str = PATH) -> None:
         self.data = SQL.DataBase(path)
         self.PrintTree()
 
-    def OpenFileDB(self):
+    def OpenFileDB(self) -> None:
         global PATH
         dialog = QFileDialog(self)
         dialog.setWindowTitle("Выбрать базу данных")
@@ -86,26 +93,33 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if dialog.exec_():
             self.connectDB(dialog.selectedFiles()[0])
 
-    def openBDO(self):
+    def openBDO(self) -> None:
         self.bdo = TableBDO(self.data.getTableSize('bdo'), 14)
         self.bdo.show()
 
-    def newObject(self):
+    def openFKKO(self) -> None:
+        self.fkko = TableFKKO(self.data.getTableSize('bdo'), 3)
+        self.fkko.show()
+
+    def newObject(self) -> None:
         self.addObject = AddNewObjectWidget(self.CityIDField.toPlainText())
         self.addObject.show()
         self.addObject.windowsclosed.connect(self.PrintTree)
 
-    def OpenWasteCalc(self):
-        if ref(self.treeWidget.selectedItems()[0], 0) == 1:
+    def OpenWasteCalc(self) -> None:
+        if ItemLevelPosition(self.treeWidget.selectedItems()[0], 0) == 1:
             print('YES')
+            self.calc = WasteCalc(self.treeWidget.selectedItems()[0].text(0), PATH)
+            self.calc.show()
+
         else:
             print("NOTHING")
 
-    def showContextMenu(self, pos):
-        if self.treeWidget.itemAt(pos) is not None and ref(self.treeWidget.selectedItems()[0], 0) == 0:
+    def showContextMenu(self, pos) -> None:
+        if self.treeWidget.itemAt(pos) is not None and ItemLevelPosition(self.treeWidget.selectedItems()[0], 0) == 0:
             self.contextMenu.exec_(self.sender().mapToGlobal(pos))
-        elif self.treeWidget.itemAt(pos) is not None and ref(self.treeWidget.selectedItems()[0], 0) == 1:
-            # нужно поработать над контекст меню
+        elif self.treeWidget.itemAt(pos) is not None and ItemLevelPosition(self.treeWidget.selectedItems()[0], 0) == 1:
+            #!!! нужно поработать над контекст меню
             self.contextMenu.exec_(self.sender().mapToGlobal(pos))
 
     def cancel(self) -> None:
@@ -113,13 +127,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def updateData(self) -> None:
         try:
-            if ref(self.treeWidget.selectedItems()[0], 0) == 0:
+            if ItemLevelPosition(self.treeWidget.selectedItems()[0], 0) == 0:
                 title = self.CityTitleField.toPlainText()
                 id = self.CityIDField.toPlainText()
                 self.data.updateCityData(title, id)
                 self.PrintTree()
-            elif ref(self.treeWidget.selectedItems()[0], 0) == 1:
-                # тут нужно сделать проверку не поменял ли пользователь название объекта на такое, которое уже есть в таблице objects, иначе крашится программа, так как в таблице objects title уникальное.
+            elif ItemLevelPosition(self.treeWidget.selectedItems()[0], 0) == 1:
+                #!!!тут нужно сделать проверку не поменял ли пользователь название объекта на такое, которое уже есть в таблице objects, иначе крашится программа, так как в таблице objects title уникальное.
                 id = self.ObjectIDField.toPlainText()
                 title = self.ObjectTitleField.toPlainText()
                 self.data.updateObjectData(title, id)
@@ -135,7 +149,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     #Удаляет город
     def DeletePos(self) -> None:
-        if self.treeWidget.selectedItems() and ref(self.treeWidget.selectedItems()[0], 0) == 0:
+        if self.treeWidget.selectedItems() and ItemLevelPosition(self.treeWidget.selectedItems()[0], 0) == 0:
             msgCommit = QMessageBox(self)
             msgCommit.setIcon(QMessageBox.Warning)
             msgCommit.setWindowTitle("Удаление города")
@@ -145,7 +159,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if not msgCommit.exec_():
                 self.data.deleteCity(self.treeWidget.selectedItems()[0].text(0))
                 self.PrintTree()
-        elif self.treeWidget.selectedItems() and ref(self.treeWidget.selectedItems()[0], 0) == 1:
+        elif self.treeWidget.selectedItems() and ItemLevelPosition(self.treeWidget.selectedItems()[0], 0) == 1:
             title = self.treeWidget.selectedItems()[0].text(0)
             id = self.data.getIDObject(title)
             msgCommit = QMessageBox(self)
@@ -157,7 +171,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if not msgCommit.exec_():
                 self.data.deleteObject(title, id)
                 self.PrintTree()
-
 
     #Печать дерева
     def PrintTree(self) -> None:
@@ -185,7 +198,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def refreshEditText(self) -> None:
         self.InfoFrame.setEnabled(True)
-        if self.treeWidget.selectedItems() and ref(self.treeWidget.selectedItems()[0], 0) == 0:
+        if self.treeWidget.selectedItems() and ItemLevelPosition(self.treeWidget.selectedItems()[0], 0) == 0:
             id = self.data.getIDCity(self.treeWidget.selectedItems()[0].text(0))
             title = self.data.getTitleCity(id)
             self.CityIDField.setEnabled(True)
@@ -197,7 +210,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.ObjectTitleField.setEnabled(False)
             self.ObjectTitleField.setText("")
             self.ObjectIDField.setText("")
-        elif self.treeWidget.selectedItems() and ref(self.treeWidget.selectedItems()[0], 0) == 1:
+        elif self.treeWidget.selectedItems() and ItemLevelPosition(self.treeWidget.selectedItems()[0], 0) == 1:
             id = self.data.getIDCity(self.treeWidget.selectedItems()[0].parent().text(0))
             titleCity = self.data.getTitleCity(id)
             title = self.treeWidget.selectedItems()[0].text(0)
@@ -228,13 +241,14 @@ class AddNewCityWidget(QLabel, Ui_NewCity):
         self.setWindowIcon(QtGui.QIcon("UI/icon/city.svg"))
         self.data = SQL.DataBase(PATH)
 
-    def addCity(self):
+    def addCity(self) -> None:
         self.data.addNewCity(self.CityTitleField.text())
         self.close()
 
-    def closeEvent(self, event):
+    def closeEvent(self, event) -> None:
         self.windowsclosed.emit()
         event.accept()
+
 
 class AddNewObjectWidget(QLabel, Ui_NewObject):
     windowsclosed = pyqtSignal()
@@ -249,7 +263,7 @@ class AddNewObjectWidget(QLabel, Ui_NewObject):
         self.setWindowIcon(QtGui.QIcon("UI/icon/organization.svg"))
         self.data = SQL.DataBase(PATH)
 
-    def addObject(self):
+    def addObject(self) -> None:
         try:
             self.data.addNewOrganization(self.ID, self.ObjectTitleField.text())
             self.close()
@@ -261,18 +275,31 @@ class AddNewObjectWidget(QLabel, Ui_NewObject):
             msg.setWindowTitle('Ошибка')
             msg.exec_()
 
-    def closeEvent(self, event):
+    def closeEvent(self, event) -> None:
         self.windowsclosed.emit()
         event.accept()
 
+
 class TableBDO(QDialog):
-    def __init__(self, row_count, col_count):
+    def __init__(self, row_count: int, col_count: int):
         super().__init__()
+        self.hazard_box = None
+        self.compound_line = None
+        self.origin_line = None
+        self.title_line = None
+        self.fkko_line = None
+        self.HazardClass = None
+        self.CompoundLineLabel = None
+        self.OriginLineLabel = None
+        self.TitleLineLabel = None
+        self.FkkoLineLabel = None
+        self.layout = None
+        self.table_widget = None
         self.data = SQL.DataBase(PATH)
         self.bdo = self.data.getBDO()
         self.initUI(row_count, col_count)
 
-    def initUI(self, row, col):
+    def initUI(self, row: int, col: int) -> None:
         columnTitle = ("Код по ФККО",
                        "Наименование вида отхода",
                        "Происхождение (Производство)",
@@ -296,9 +323,9 @@ class TableBDO(QDialog):
         self.table_widget.setWordWrap(True)
         self.table_widget.setColumnCount(col)
         self.table_widget.setHorizontalHeaderLabels(columnTitle)
+        [self.table_widget.setColumnWidth(i, 120) for i in range(14)]
         self.table_widget.setRowCount(row)
         self.table_widget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-
 
         for i in range(row):
             for j in range(col):
@@ -316,7 +343,6 @@ class TableBDO(QDialog):
 
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.table_widget)
-
 
         # Названия фильтров
         self.FkkoLineLabel = QLabel()
@@ -336,7 +362,7 @@ class TableBDO(QDialog):
         self.origin_line = QLineEdit()
         self.compound_line = QLineEdit()
         self.hazard_box = QComboBox()
-        self.hazard_box.addItems(('', 'I', 'II', "III", "IV", "V"))
+        self.hazard_box.addItems(('Любой', 'I', 'II', "III", "IV", "V"))
 
         # подключение фильтра к событию изменения текста в line
         self.fkko_line.textChanged.connect(self.filterTable)
@@ -359,7 +385,7 @@ class TableBDO(QDialog):
 
         self.setLayout(self.layout)
 
-    def filterTable(self):
+    def filterTable(self) -> None:
         fkko_filter_text = self.fkko_line.text()
         title_filter_text = self.title_line.text()
         origin_filter_text = self.origin_line.text()
@@ -376,14 +402,103 @@ class TableBDO(QDialog):
             hazard_item = self.table_widget.item(row, 11)
 
             if (fkko_filter_text.lower() in fkko_item.text().lower()
-                    and title_filter_text.lower() in title_item.text().lower())\
-                    and (origin_filter_text.lower() in origin1_item.text().lower() or origin_filter_text.lower() in origin2_item.text().lower() or origin_filter_text.lower() in origin3_item.text().lower())\
-                    and set(compound_filter_list).issubset(compound_list)\
+                and title_filter_text.lower() in title_item.text().lower()) \
+                    and (
+                    origin_filter_text.lower() in origin1_item.text().lower() or origin_filter_text.lower() in origin2_item.text().lower() or origin_filter_text.lower() in origin3_item.text().lower()) \
+                    and set(compound_filter_list).issubset(compound_list) \
                     and (hazard_filter_text.lower() == hazard_item.text().lower()):
                 self.table_widget.setRowHidden(row, False)
             else:
                 self.table_widget.setRowHidden(row, True)
 
+class TableFKKO(QDialog):
+    def __init__(self, row_count: int, col_count: int):
+        super().__init__()
+        self.data = SQL.DataBase(PATH)
+        self.fkko = self.data.getFKKO()
+        self.initUI(row_count, col_count)
+
+    def initUI(self, row: int, col: int) -> None:
+        columnTitle = ("Код по ФККО",
+                       "Наименование вида отхода",
+                       "Класс опасности")
+
+        self.setWindowTitle("Федеральный классификационный каталог отходов")
+        self.setGeometry(100, 100, 1050, 800)
+        self.setWindowModality(2)
+
+        self.table_widget = QTableWidget()
+        self.table_widget.setWordWrap(True)
+        self.table_widget.setColumnCount(col)
+        self.table_widget.setHorizontalHeaderLabels(columnTitle)
+        self.table_widget.setColumnWidth(0, 100)
+        self.table_widget.setColumnWidth(1, 750)
+        self.table_widget.setColumnWidth(2, 100)
+        self.table_widget.setRowCount(row)
+        self.table_widget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+
+        for i in range(row):
+            for j in range(col):
+                if str(self.fkko[i][j]) == 'nan':
+                    el = ''
+                else:
+                    el = str(self.fkko[i][j]).strip('\n')
+                item = QTableWidgetItem(el)
+                item.setTextAlignment(0x0001)
+                item.setFlags(item.flags() | 0x0002)
+                item.setFlags(item.flags() | 0x0004)
+                self.table_widget.setItem(i, j, item)
+            # self.table_widget.verticalHeader().setSectionResizeMode(i, QHeaderView.ResizeToContents)
+        self.table_widget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+
+        self.layout = QVBoxLayout()
+        self.layout.addWidget(self.table_widget)
+
+        # Названия фильтров
+        self.FkkoLineLabel = QLabel()
+        self.FkkoLineLabel.setText('Фильтр по коду ФККО')
+        self.TitleLineLabel = QLabel()
+        self.TitleLineLabel.setText('Фильтр по наименованию отхода')
+        self.HazardClass = QLabel()
+        self.HazardClass.setText('Фильтр по классу опасности')
+
+        # строки ввода фильтров
+        self.fkko_line = QLineEdit()
+        self.title_line = QLineEdit()
+        self.hazard_box = QComboBox()
+        self.hazard_box.addItems(('Любой', 'I', 'II', "III", "IV", "V"))
+
+        # подключение фильтра к событию изменения текста в line
+        self.fkko_line.textChanged.connect(self.filterTable)
+        self.title_line.textChanged.connect(self.filterTable)
+        self.hazard_box.currentTextChanged.connect(self.filterTable)
+
+        # добавление на слой LabelLine и Line
+        self.layout.addWidget(self.FkkoLineLabel)
+        self.layout.addWidget(self.fkko_line)
+        self.layout.addWidget(self.TitleLineLabel)
+        self.layout.addWidget(self.title_line)
+        self.layout.addWidget(self.HazardClass)
+        self.layout.addWidget(self.hazard_box)
+
+        self.setLayout(self.layout)
+
+    def filterTable(self) -> None:
+        fkko_filter_text = self.fkko_line.text()
+        title_filter_text = self.title_line.text()
+        hazard_filter_text = self.hazard_box.currentText()
+
+        for row in range(self.table_widget.rowCount()):
+            fkko_item = self.table_widget.item(row, 0)
+            title_item = self.table_widget.item(row, 1)
+            hazard_item = self.table_widget.item(row, 2)
+
+            if (fkko_filter_text.lower() in fkko_item.text().lower()
+                and title_filter_text.lower() in title_item.text().lower()) \
+                    and (hazard_filter_text.lower() == hazard_item.text().lower()):
+                self.table_widget.setRowHidden(row, False)
+            else:
+                self.table_widget.setRowHidden(row, True)
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
