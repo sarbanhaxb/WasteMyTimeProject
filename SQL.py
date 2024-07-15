@@ -27,6 +27,8 @@ class DataBase:
             self.createBDO()
         self.DB.commit()
 
+        self.createObjectTable()
+
     def updateCityData(self, title, id) -> None:
         self.cursor.execute("UPDATE cities SET title=? WHERE id=?", (title, id))
         self.DB.commit()
@@ -39,7 +41,7 @@ class DataBase:
         self.cursor.execute(f"DELETE FROM cities WHERE title='{title}'")
         self.DB.commit()
 
-    def deleteObject(self, title, id):
+    def deleteObject(self, title, id) -> None:
         self.cursor.execute(f"DELETE FROM objects WHERE title='{title}' AND id='{id}'")
         self.DB.commit()
 
@@ -64,11 +66,11 @@ class DataBase:
     def getTitleCity(self, id) -> str:
         return str(self.cursor.execute(f"SELECT title FROM cities WHERE id='{id}'").fetchall()[0][0])
 
-    def addNewCity(self, title: str):
+    def addNewCity(self, title: str) -> None:
         self.cursor.execute("INSERT INTO cities (title) VALUES (?)", (title,))
         self.DB.commit()
 
-    def addNewOrganization(self, id_city, title: str):
+    def addNewOrganization(self, id_city, title: str) -> None:
         if self.DB.execute(f"SELECT * FROM objects WHERE title='{title}'").fetchall():
             raise IndexError
         else:
@@ -78,7 +80,7 @@ class DataBase:
     def getIDObject(self, title) -> str:
         return str(self.cursor.execute(f"SELECT id FROM objects WHERE title='{title}'").fetchall()[0][0])
 
-    def createBDO(self):
+    def createBDO(self) -> None:
         self.cursor.execute("CREATE TABLE IF NOT EXISTS bdo ("
                             "id INTEGER PRIMARY KEY, "
                             "num VARCHAR(30), "
@@ -110,12 +112,34 @@ class DataBase:
     def getTableSize(self, name: str) -> int:
         return self.DB.execute(f"SELECT count (*) FROM '{name}'").fetchall()[0][0]
 
-
     def getFKKO(self) -> list:
         return self.DB.execute("SELECT num, title, hazardClass from bdo").fetchall()
 
     def getBDO(self) -> list:
         return self.DB.execute("SELECT num, title, originManufacturing, originProducts, originProcess, compound, compoundPercentMin, compoundPercentMax, compoundNotice, wasteNotice, physicalState, hazardClass, attributionCriteria, docs FROM bdo").fetchall()
+
+    def createObjectTable(self) -> None:
+        self.DB.execute(f"CREATE TABLE IF NOT EXISTS calcObjectsInfo "
+                       f"(id INTEGER PRIMARY KEY, "
+                        f"id_object INTEGER, "
+                        f"title VARCHAR(100), "
+                        f"FOREIGN KEY (id_object) REFERENCES objects(id) ON DELETE CASCADE)")
+
+    def CalcTableRefresh(self, id) -> list:
+        return self.DB.execute(f"SELECT title, id FROM calcObjectsInfo WHERE id_object = '{id}'").fetchall()
+
+    def addCalcTablePosition(self, id, title="") -> None:
+        self.DB.execute(f"INSERT INTO calcObjectsInfo (id_object, title) VALUES ('{id}', '{title}')")
+        self.DB.commit()
+
+    def delCalcTablePosition(self, id) -> None:
+        if id:
+            self.DB.execute(f"DELETE FROM calcObjectsInfo WHERE id={id}")
+            self.DB.commit()
+
+    def updateTable(self, title, id) -> None:
+        self.DB.execute(f"UPDATE calcObjectsInfo SET title='{title}' WHERE id='{id}'")
+        self.DB.commit()
 
 
 """testing command"""

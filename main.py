@@ -108,8 +108,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def OpenWasteCalc(self) -> None:
         if ItemLevelPosition(self.treeWidget.selectedItems()[0], 0) == 1:
-            print('YES')
-            self.calc = WasteCalc(self.treeWidget.selectedItems()[0].text(0), PATH)
+            id = self.data.getIDObject(self.treeWidget.selectedItems()[0].text(0))
+            self.calc = WasteCalc(id, PATH)
             self.calc.show()
 
         else:
@@ -411,6 +411,7 @@ class TableBDO(QDialog):
             else:
                 self.table_widget.setRowHidden(row, True)
 
+
 class TableFKKO(QDialog):
     def __init__(self, row_count: int, col_count: int):
         super().__init__()
@@ -499,6 +500,7 @@ class TableFKKO(QDialog):
                 self.table_widget.setRowHidden(row, False)
             else:
                 self.table_widget.setRowHidden(row, True)
+
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
