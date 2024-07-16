@@ -64,6 +64,7 @@ class Ui_Calc(object):
 
         self.saveChangeButton = QtWidgets.QPushButton(self.horizontalLayoutWidget)
         self.saveChangeButton.setText("")
+        self.saveChangeButton.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         icon5 = QtGui.QIcon()
         icon5.addPixmap(QtGui.QPixmap("UI/icon/save.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.saveChangeButton.setIcon(icon5)

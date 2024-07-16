@@ -38,7 +38,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.connectDB()
         self.PrintTree()
         self.ExitButton.clicked.connect(self.closeApp)
+        self.ExitButton.setToolTip("Выйти из программы")
         self.AddButton.clicked.connect(self.addNewCity)
+        self.AddButton.setToolTip("Добавить новый город")
         WinIcon = QtGui.QIcon()
         WinIcon.addPixmap(QtGui.QPixmap('UI/icon/trash-svgrepo-com.svg'), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.setWindowIcon(QtGui.QIcon('UI/icon/trash-svgrepo-com.svg'))
@@ -46,15 +48,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Удаление города/объекта
         self.DeleteButton.clicked.connect(self.DeletePos)
+        self.DeleteButton.setToolTip("Удалить город/объект")
 
         # Обновление поля информации
         self.treeWidget.itemSelectionChanged.connect(self.refreshEditText)
 
         #сохранение изменения
         self.saveChanges.clicked.connect(self.updateData)
+        self.saveChanges.setToolTip("Сохранить изменения")
 
         #отменить изменения
         self.cancelChanges.clicked.connect(self.cancel)
+        self.cancelChanges.setToolTip("Отменить изменения")
 
         #Контекст меню на City
         self.contextMenu = QMenu(self.treeWidget)

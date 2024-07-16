@@ -41,11 +41,13 @@ class Ui_MainWindow(object):
         icon.addPixmap(QtGui.QPixmap("UI/icon/close"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.DeleteButton.setIcon(icon)
         self.DeleteButton.setIconSize(QtCore.QSize(36, 36))
-
+        self.DeleteButton.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.DeleteButton.setObjectName("DeleteButton")
+
         self.AddButton = QtWidgets.QPushButton(self.ButtonFrame)
         self.AddButton.setGeometry(QtCore.QRect(10, 10, 40, 40))
         self.AddButton.setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.AddButton.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.AddButton.setText("")
 
         icon1 = QtGui.QIcon()
@@ -70,6 +72,7 @@ class Ui_MainWindow(object):
         self.ExitButton = QtWidgets.QPushButton(self.ButtonFrame)
         self.ExitButton.setGeometry(QtCore.QRect(130, 10, 40, 40))
         self.ExitButton.setText("")
+        self.ExitButton.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         icon2 = QtGui.QIcon()
         icon2.addPixmap(QtGui.QPixmap('UI/icon/exit'), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.ExitButton.setIcon(icon2)
@@ -139,6 +142,8 @@ class Ui_MainWindow(object):
         self.saveChanges = QtWidgets.QPushButton(self.InfoFrame)
         self.saveChanges.setGeometry(QtCore.QRect(320, 310, 31, 31))
         self.saveChanges.setText("")
+        self.saveChanges.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+
         icon3 = QtGui.QIcon()
         icon3.addPixmap(QtGui.QPixmap("UI/icon/save"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.saveChanges.setIcon(icon3)
@@ -154,6 +159,8 @@ class Ui_MainWindow(object):
         self.cancelChanges.setIcon(icon4)
         self.cancelChanges.setIconSize(QtCore.QSize(24, 24))
         self.cancelChanges.setObjectName("pushButton_2")
+        self.cancelChanges.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+
 
         # Линии
         self.line_6 = QtWidgets.QFrame(self.InfoFrame)

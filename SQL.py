@@ -137,6 +137,11 @@ class DataBase:
             self.DB.execute(f"DELETE FROM calcObjectsInfo WHERE id={id}")
             self.DB.commit()
 
+    def delCalcTablePositions(self, ids) -> None:
+        if ids:
+            for id in ids:
+                self.delCalcTablePosition(id)
+
     def updateTable(self, title, id) -> None:
         self.DB.execute(f"UPDATE calcObjectsInfo SET title='{title}' WHERE id='{id}'")
         self.DB.commit()
