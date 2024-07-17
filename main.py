@@ -26,6 +26,8 @@ def ItemLevelPosition(item: QTreeWidgetItem, count: int) -> int:
 
 PATH: str = 'DataBase.db'
 
+class NotUniqueError(Exception):
+    pass
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -247,8 +249,16 @@ class AddNewCityWidget(QLabel, Ui_NewCity):
         self.data = SQL.DataBase(PATH)
 
     def addCity(self) -> None:
-        self.data.addNewCity(self.CityTitleField.text())
-        self.close()
+        try:
+            self.data.addNewCity(self.CityTitleField.text())
+            self.close()
+        except NameError:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText("Ошибка")
+            msg.setText("Город с таким названием существует.")
+            msg.setWindowTitle('Ошибка')
+            msg.exec_()
 
     def closeEvent(self, event) -> None:
         self.windowsclosed.emit()
@@ -272,7 +282,7 @@ class AddNewObjectWidget(QLabel, Ui_NewObject):
         try:
             self.data.addNewOrganization(self.ID, self.ObjectTitleField.text())
             self.close()
-        except IndexError:
+        except NameError:
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Critical)
             msg.setText("Ошибка")

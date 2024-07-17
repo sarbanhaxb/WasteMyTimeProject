@@ -4,6 +4,8 @@ from typing import List, Any
 import pandas as pd
 from PyQt5.QtWidgets import QMessageBox
 
+from main import NotUniqueError
+
 
 class DataBase:
     def __init__(self, path):
@@ -13,7 +15,7 @@ class DataBase:
         self.cursor.execute("PRAGMA foreign_keys = ON;")
         self.cursor.execute("CREATE TABLE IF NOT EXISTS cities ("
                             "id INTEGER PRIMARY KEY,"
-                            "title VARCHAR(100) NOT NULL)"
+                            "title VARCHAR(100) NOT NULL UNIQUE)"
                             "")
         self.cursor.execute("CREATE TABLE IF NOT EXISTS objects("
                             "id INTEGER PRIMARY KEY,"
@@ -67,12 +69,15 @@ class DataBase:
         return str(self.cursor.execute(f"SELECT title FROM cities WHERE id='{id}'").fetchall()[0][0])
 
     def addNewCity(self, title: str) -> None:
-        self.cursor.execute("INSERT INTO cities (title) VALUES (?)", (title,))
-        self.DB.commit()
+        if self.DB.execute(f"SELECT * FROM cities WHERE title='{title}'").fetchall():
+            raise NameError
+        else:
+            self.cursor.execute("INSERT INTO cities (title) VALUES (?)", (title,))
+            self.DB.commit()
 
     def addNewOrganization(self, id_city, title: str) -> None:
         if self.DB.execute(f"SELECT * FROM objects WHERE title='{title}'").fetchall():
-            raise IndexError
+            raise NameError
         else:
             self.cursor.execute(f"INSERT INTO objects (id_city, title) VALUES ('{int(id_city)}', '{title}')")
             self.DB.commit()

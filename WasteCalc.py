@@ -1,6 +1,7 @@
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import QMainWindow, QLabel, QTableWidgetItem, QMessageBox
+from PyQt5.QtCore import pyqtSignal, Qt
+from PyQt5.QtGui import QKeySequence
+from PyQt5.QtWidgets import QMainWindow, QLabel, QTableWidgetItem, QMessageBox, QMenu, QAction, QShortcut
 
 import SQL
 from UI.AddObjectWindow import Ui_NewObject
@@ -15,21 +16,62 @@ class WasteCalc(QMainWindow, Ui_Calc):
         self.data = SQL.DataBase(PATH)
         self.object_ID = id
         self.backButton.clicked.connect(self.close)
+        self.backButton.setToolTip("Назад")
         self.ExitAction.triggered.connect(self.close)
         self.data.createObjectTable()
 
         self.refreshTable()
 
         self.ButtonAddCalc.clicked.connect(self.addNewCalc)
+        self.ButtonAddCalc.setToolTip("Добавить вариант расчета")
         self.AddNewCalc.triggered.connect(self.addNewCalc)
 
         self.ButtonDelete.clicked.connect(self.DelCalc)
+        self.ButtonDelete.setToolTip("Удалить вариант расчета")
         self.DeleteCalc.triggered.connect(self.DelCalc)
 
         self.tableWidget.cellClicked.connect(self.on_cell_clicked)
         self.choosenPos = None
 
         self.saveChangeButton.clicked.connect(self.updateTableData)
+        self.saveChangeButton.setToolTip("Сохранить изменения")
+        self.saveChangeShortcut = QShortcut(QKeySequence("Ctrl+S"), self)
+        self.saveChangeShortcut.activated.connect(self.updateTableData)
+
+        self.goCalcButton.setToolTip("Выполнить расчет")
+        self.goCalcButton.clicked.connect(self.goCalc)
+        self.tableWidget.doubleClicked.connect(self.goCalc)
+
+        self.printButton.setToolTip("Выгрузить отчет")
+        self.printButton.clicked.connect(self.printCalc)
+
+        self.contextMenu = QMenu(self.tableWidget)
+        action1 = self.contextMenu.addAction("Добавить вариант расчета")
+        action2 = self.contextMenu.addAction("Удалить вариант расчета")
+
+        action1.triggered.connect(self.addNewCalc)
+        action2.triggered.connect(self.DelCalc)
+
+        self.tableWidget.cellChanged.connect(self.updateTableData)
+
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(lambda pos: self.contextMenu.exec_(self.mapToGlobal(pos)))
+
+    def showContextMenu(self, pos) -> None:
+        if self.tableWidget.itemAt(pos) is not None:
+            self.contextMenu.exec_(self.sender().mapToGlobal(pos))
+        elif self.treeWidget.itemAt(pos) is not None:
+            self.contextMenu.exec_(self.sender().mapToGlobal(pos))
+
+    def printCalc(self):
+        if self.tableWidget.selectedItems():
+            print("Print")
+            pass
+
+    def goCalc(self):
+        if self.tableWidget.selectedItems():
+            print('CALC')
+            pass
 
     def updateTableData(self) -> None:
         try:
@@ -55,9 +97,29 @@ class WasteCalc(QMainWindow, Ui_Calc):
             msgCommit.setText('Будут удалены все данные. Уверены?')
             msgCommit.addButton("Да", QMessageBox.YesRole)
             msgCommit.addButton("Нет", QMessageBox.NoRole)
-            if not msgCommit.exec_():
-                self.data.delCalcTablePosition(self.choosenPos)
-                self.refreshTable()
+            if len(self.tableWidget.selectedItems()) == 1:
+                if not msgCommit.exec_():
+                    self.data.delCalcTablePosition(self.choosenPos)
+                    self.refreshTable()
+            else:
+                if not msgCommit.exec_():
+                    selected_rows = set()
+                    for item in self.tableWidget.selectedItems():
+                        selected_rows.add(item.row())
+
+                    values = []
+                    for row in selected_rows:
+                        row_data = []
+                        for column in range(self.tableWidget.columnCount()):
+                            item = self.tableWidget.item(row, column)
+                            if item is not None:
+                                row_data.append(item.text())
+                            else:
+                                row_data.append('')
+                        values.append(row_data[2])
+                    self.data.delCalcTablePositions(values)
+                    self.refreshTable()
+
 
     def refreshTable(self) -> None:
         self.tableWidget.clear()
