@@ -26,8 +26,6 @@ def ItemLevelPosition(item: QTreeWidgetItem, count: int) -> int:
 
 PATH: str = 'DataBase.db'
 
-class NotUniqueError(Exception):
-    pass
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -38,7 +36,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.data = None
         self.connectDB()
-        self.PrintTree()
+        # self.PrintTree()
         self.ExitButton.clicked.connect(self.closeApp)
         self.ExitButton.setToolTip("Выйти из программы")
         self.AddButton.clicked.connect(self.addNewCity)
@@ -91,6 +89,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def connectDB(self, path: str = PATH) -> None:
         self.data = SQL.DataBase(path)
         self.PrintTree()
+        self.data.close()
 
     def OpenFileDB(self) -> None:
         global PATH
@@ -204,6 +203,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.treeWidget.expandAll()
 
     def refreshEditText(self) -> None:
+        self.data = SQL.DataBase()
         self.InfoFrame.setEnabled(True)
         if self.treeWidget.selectedItems() and ItemLevelPosition(self.treeWidget.selectedItems()[0], 0) == 0:
             id = self.data.getIDCity(self.treeWidget.selectedItems()[0].text(0))
@@ -232,6 +232,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             pass
 
+        self.data.close()
+
     def closeApp(self) -> None:
         self.close()
 
@@ -249,6 +251,7 @@ class AddNewCityWidget(QLabel, Ui_NewCity):
         self.data = SQL.DataBase(PATH)
 
     def addCity(self) -> None:
+        self.data = SQL.DataBase(PATH)
         try:
             self.data.addNewCity(self.CityTitleField.text())
             self.close()

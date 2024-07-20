@@ -4,8 +4,6 @@ from typing import List, Any
 import pandas as pd
 from PyQt5.QtWidgets import QMessageBox
 
-from main import NotUniqueError
-
 
 class DataBase:
     def __init__(self, path):

@@ -63,12 +63,12 @@ class WasteCalc(QMainWindow, Ui_Calc):
         elif self.treeWidget.itemAt(pos) is not None:
             self.contextMenu.exec_(self.sender().mapToGlobal(pos))
 
-    def printCalc(self):
+    def printCalc(self) -> None:
         if self.tableWidget.selectedItems():
             print("Print")
             pass
 
-    def goCalc(self):
+    def goCalc(self) -> None:
         if self.tableWidget.selectedItems():
             print('CALC')
             pass
@@ -119,7 +119,6 @@ class WasteCalc(QMainWindow, Ui_Calc):
                         values.append(row_data[2])
                     self.data.delCalcTablePositions(values)
                     self.refreshTable()
-
 
     def refreshTable(self) -> None:
         self.tableWidget.clear()
